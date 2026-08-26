@@ -219,6 +219,7 @@ function updateWishlistBadge() {
     if (wishlistBadge) {
         wishlistBadge.textContent = wishlist.length;
     }
+    window.location.reload();
 }
 
 function syncHeartIcons() {
@@ -368,6 +369,7 @@ function CloseCart(){
         Cart.classList.remove('active');
         document.body.classList.remove('no-scroll');
     }
+    window.location.reload();
 }
 
 function OpenCart(){
