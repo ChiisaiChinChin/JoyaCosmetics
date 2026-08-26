@@ -369,7 +369,6 @@ function CloseCart(){
         Cart.classList.remove('active');
         document.body.classList.remove('no-scroll');
     }
-    window.location.reload();
 }
 
 function OpenCart(){
