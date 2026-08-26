@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Joya Cosmetics | תשלום</title>
+  <!-- Contentful SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/contentful@latest/dist/contentful.browser.min.js"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+
+  <!-- App JavaScript -->
+  <script src="product-details.js"></script>
+  <script src="index.js"></script>
+</head>
+
+<body>
+
+<!-- HEADER NAVIGATION -->
+<header class="header">
+  <div class="container header-content">
+    <div class="header-icons">
+      <!-- Mobile Menu Toggle -->
+      <div class="icon-btn" onclick="toggleMenu()">
+        <i class="fa-solid fa-bars"></i>
+      </div>
+
+      <!-- Shopping Cart Icon -->
+      <div class="icon-btn" onclick="OpenCart()">
+        <i class="fa-solid fa-basket-shopping"></i>
+        <span id="OpQuantity" class="badge">0</span>
+      </div>
+
+      <!-- Wishlist Icon -->
+      <a href="WishListPage.html" class="icon-btn wishlist-icon">
+        <i class="fa-regular fa-heart"></i>
+        <span class="badge">0</span>
+      </a>
+    </div>
+
+    <!-- SEARCH BAR -->
+    <div class="search-box">
+      <input type="text" id="Search" placeholder="חפש מוצרים...">
+    </div>
+
+    <div class="logo">JOYA COSMETICS</div>
+  </div>
+</header>
+<main class="container page-main">
+  <div id="checkoutModal" class="checkout-content">
+    <h2>סיכום הזמנה - Joya Cosmetics</h2>
+
+    <!-- Cart Items Summary List -->
+    <div class="cart-items-summary">
+      <h3>הפריטים בהזמנה:</h3>
+      <div id="checkoutItems" class="checkout-items-list">
+        <!-- JS will inject cart items here -->
+      </div>
+    </div>
+
+    <!-- Total Display -->
+    <div class="cart-summary">
+      <p><span>סה"כ לתשלום:</span> <strong id="modalTotal">₪0.00</strong></p>
+    </div>
+
+    <form id="paymentForm">
+      <label for="firstName">שם פרטי:</label>
+      <input type="text" id="firstName" required placeholder="ישראל">
+
+      <label for="lastName">שם משפחה:</label>
+      <input type="text" id="lastName" required placeholder="ישראלי">
+
+      <label for="custEmail">אימייל:</label>
+      <input type="email" id="custEmail" required placeholder="example@domain.com">
+
+      <label for="custPhone">טלפון:</label>
+      <input type="tel" id="custPhone" required placeholder="050-0000000">
+
+      <label for="custAddress">כתובת למשלוח:</label>
+      <input type="text" id="custAddress" required placeholder="רחוב, מספר בית, עיר">
+
+      <button type="submit" id="payBtn" class="primary-btn">מעבר לתשלום מאובטח</button>
+    </form>
+  </div>
+</main>
+
+<!-- SHOPPING CART SIDEBAR / MODAL -->
+<div id="Cart" class="cart-modal">
+  <div class="cart-content">
+    <div class="cart-header">
+      <h2>סל הקניות</h2>
+      <button class="close-cart" onclick="CloseCart()">&times;</button>
+    </div>
+
+    <ul id="CartItems" class="cart-items-list">
+      <!-- Rendered dynamically via JavaScript -->
+    </ul>
+
+    <div class="cart-footer">
+      <div id="Cost" class="total-cost">סך הכל: ₪0</div>
+      <button class="btn-checkout" onclick="window.location.href='CheckOutPage.html'">למעבר לתשלום</button>
+    </div>
+  </div>
+</div>
+<!-- SIDE MENU OVERLAY & DRAWER -->
+<div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
+<aside id="sideMenu" class="side-menu">
+  <div class="menu-header">
+    <h3>תפריט</h3>
+    <button class="close-menu" onclick="toggleMenu()">&times;</button>
+  </div>
+  <ul class="menu-links">
+    <li><a href="index.html">דף הבית</a></li>
+    <li><a href="WishListPage.html">מוצרים שאהבת</a></li>
+    <li class="has-dropdown">
+      <span onclick="toggleDropdown(this)">מותגי החברה<i class="fa-solid fa-chevron-down"></i></span>
+      <ul class="dropdown">
+        <li><a href="Argan.html">סדרת ארגן</a></li>
+        <li><a href="Coco&Honey.html">סדרת דבש וקוקוס</a></li>
+        <li><a href="Curls.html">הסדרה למתולתלות</a></li>
+        <li><a href="Hempha.html">המפה</a></li>
+        <li><a href="KeratinForte.html">קרטין פורטה</a></li>
+        <li><a href="MyCollection.html">my collection</a></li>
+        <li><a href="Pishtan.html">סדרת זרעי פשתן</a></li>
+      </ul>
+    </li>
+    <li class="has-dropdown">
+      <span onclick="toggleDropdown(this)">קטגוריות <i class="fa-solid fa-chevron-down"></i></span>
+      <ul class="dropdown">
+        <li><a href="HairMasks.html">מסכות הזנה</a></li>
+        <li><a href="Conditioners.html">כל המרככים</a></li>
+        <li><a href="Shampoo.html">כל השמפו</a></li>
+        <li><a href="Serums.html">כל הסרומים</a></li>
+        <li><a href="Moisturizings.html">כל קרמי הלחות</a></li>
+      </ul>
+    </li>
+    <li><a href="AboutUs.html">אודותינו</a></li>
+    <li><a href="DeliveryPolicy.html">מדיניות משלוחים</a></li>
+    <li><a href="WebsiteRegulations.html">תקנון האתר</a></li>
+    <li><a href="ContactUs.html">צור קשר</a></li>
+    <li><a href="WebsiteRegulations.html">הצהרת נגישות</a></li>
+  </ul>
+</aside>
+<!-- Cookie & Regulations Popup -->
+<div id="cookieBanner" class="cookie-banner hidden">
+  <div class="cookie-content">
+    <p>
+      אנו משתמשים בעוגיות (Cookies) ומבקשים את הסכמתך ל<a href="WebsiteRegulations.html" target="_blank" class="cookie-link">תקנון האתר, מדיניות הפרטיות והצהרת הנגישות</a>.
+    </p>
+    <button id="acceptCookiesBtn" class="cookie-btn">אני מסכים/ה</button>
+  </div>
+</div>
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container footer-grid">
+    <div class="footer-col">
+      <h3>JOYA COSMETICS</h3>
+      <p style="font-size:0.85rem; color:#ebdcd7; margin-bottom:12px;">הרשמו לניוזלטר לקבלת עדכונים ומבצעים בלעדיים</p>
+      <input type="email" placeholder="דוא״ל לקבלת עדכונים" class="newsletter-input">
+    </div>
+    <div class="footer-col">
+      <h3>מפת אתר</h3>
+      <ul class="footer-links">
+        <li><a href="AboutUs.html">אודותינו</a></li>
+        <li><a href="DeliveryPolicy.html">מדיניות משלוחים</a></li>
+        <li><a href="WebsiteRegulations.html#Regulations">תקנון האתר</a></li>
+        <li><a href="ContactUs.html">צור קשר</a></li>
+        <li><a href="WebsiteRegulations.html#AccessabilityPolicy">הצהרת נגישות</a></li>
+        <li><a href="WebsiteRegulations.html#PrivacyPolicy">תקנון פרטיות</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h3>מותגי החברה</h3>
+      <ul class="footer-links">
+        <li><a href="Argan.html">ARGAN SECRET | סדרת ארגן</a></li>
+        <li><a href="Coco&Honey.html">COCO&HONEY | סדרת דבש וקוקוס</a></li>
+        <li><a href="Curls.html">CURLS | הסדרה למתולתלות</a></li>
+        <li><a href="Hempha.html">HEMPHA | המפה</a></li>
+        <li><a href="KeratinForte.html">KERATIN FORTE | קרטין פורטה</a></li>
+        <li><a href="MyCollection.html">MY COLLECTION</a></li>
+        <li><a href="Pishtan.html">FLAX SEED | סדרת זרעי פשתן</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h3>קטגוריות נוספות</h3>
+      <ul class="footer-links">
+        <li><a href="HairMasks.html">מסכות הזנה לשיער</a></li>
+        <li><a href="Conditioners.html">המרככים</a></li>
+        <li><a href="Shampoo.html">שמפו</a></li>
+        <li><a href="Serums.html">סרומים</a></li>
+        <li><a href="Moisturizings.html">קרמי הלחות</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h3>מדיה</h3>
+      <ul class="footer-links">
+        <img class='Icon' src="Pictures/Facebook-Logo-1--Streamline-Ultimate.png" height="30" width="30" onclick="window.open('https://www.facebook.com/Joya.Cosmetics/about/', '_blank');"/>
+        <img class='Icon' src="Pictures/Instagram-Logo--Streamline-Ultimate.png" height="30" width="30" onclick="window.open('https://www.instagram.com/joya_cosmetics/', '_blank');"/>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom container">
+    <p>© כל הזכויות שמורות ל-JOYA COSMETICS</p>
+  </div>
+</footer>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    renderCheckoutSummary();
+  });
+
+  function renderCheckoutSummary() {
+    // 1. Check multiple potential localStorage keys
+    const rawCart = localStorage.getItem('cart')
+            || localStorage.getItem('joya_cart')
+            || localStorage.getItem('cartItems')
+            || localStorage.getItem('shoppingCart')
+            || '[]';
+
+    const cart = JSON.parse(rawCart);
+    console.log('Cart retrieved from storage:', cart); // Debug log
+
+    const container = document.getElementById('checkoutItems');
+    const totalElement = document.getElementById('modalTotal');
+    const payBtn = document.getElementById('payBtn');
+
+    if (!cart || cart.length === 0) {
+      if (container) container.innerHTML = '<p style="text-align:center; color:#888;">העגלה שלך ריקה (לא נמצאו מוצרים בזיכרון)</p>';
+      if (totalElement) totalElement.textContent = '₪0.00';
+      if (payBtn) payBtn.disabled = true;
+      return;
+    }
+
+    let grandTotal = 0;
+    if (container) container.innerHTML = '';
+
+    cart.forEach(item => {
+      // 2. Normalize property names (handles title/name/productName & price string formats)
+      const title = item.title || item.name || item.productName || item.fields?.title || 'מוצר';
+      const rawPrice = item.price || item.fields?.price || 0;
+
+      // Clean non-numeric characters from price if stored as string like "₪45"
+      const priceNum = typeof rawPrice === 'number' ? rawPrice : parseFloat(String(rawPrice).replace(/[^\d.]/g, '')) || 0;
+      const quantity = parseInt(item.quantity || item.qty || 1, 10);
+
+      const itemTotal = priceNum * quantity;
+      grandTotal += itemTotal;
+
+      if (container) {
+        const row = document.createElement('div');
+        row.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #eee;">
+            <div>
+              <span style="font-weight: 600;">${title}</span>
+              <span style="color: #777;"> (x${quantity})</span>
+            </div>
+            <span style="font-weight: bold; color: #d88195;">₪${itemTotal.toFixed(2)}</span>
+          </div>
+        `;
+        container.appendChild(row);
+      }
+    });
+
+    if (totalElement) {
+      totalElement.textContent = `₪${grandTotal.toFixed(2)}`;
+    }
+  }
+
+  // Handle Form Submission
+  document.getElementById('paymentForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const payBtn = document.getElementById('payBtn');
+    payBtn.disabled = true;
+    payBtn.textContent = 'מעבר לתשלום...';
+
+    const totalText = document.getElementById('modalTotal').textContent.replace('₪', '').trim();
+    const totalAmount = parseFloat(totalText) || 0;
+
+    if (totalAmount <= 0) {
+      alert('העגלה ריקה או שסכום ההזמנה אינו תקין');
+      payBtn.disabled = false;
+      payBtn.textContent = 'מעבר לתשלום מאובטח';
+      return;
+    }
+
+    const rawCart = localStorage.getItem('cart') || localStorage.getItem('joya_cart') || localStorage.getItem('cartItems') || '[]';
+
+    const checkoutData = {
+      customerName: document.getElementById('custName').value,
+      customerEmail: document.getElementById('custEmail').value,
+      customerPhone: document.getElementById('custPhone').value,
+      customerAddress: document.getElementById('custAddress').value,
+      amount: totalAmount,
+      items: JSON.parse(rawCart)
+    };
+
+    try {
+      const response = await fetch('/api/create-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(checkoutData)
+      });
+
+      const data = await response.json();
+
+      if (data.paymentUrl) {
+        window.location.href = data.paymentUrl;
+      } else {
+        alert('אירעה שגיאה ביצירת התשלום. אנא נסה שנית.');
+        payBtn.disabled = false;
+        payBtn.textContent = 'מעבר לתשלום מאובטח';
+      }
+    } catch (err) {
+      console.error('Payment error:', err);
+      alert('אירעה שגיאה בהתחברות לשרת.');
+      payBtn.disabled = false;
+      payBtn.textContent = 'מעבר לתשלום מאובטח';
+    }
+  });
+
+  // checkout.js
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const checkoutForm = document.getElementById('checkoutForm'); // Or your pay button ID
+
+    if (checkoutForm) {
+      checkoutForm.addEventListener('submit', handleCheckoutSubmit);
+    }
+  });
+
+  async function handleCheckoutSubmit(event) {
+    event.preventDefault(); // Stop form from doing a standard page reload
+
+    const payButton = document.getElementById('payButton');
+    if (payButton) {
+      payButton.disabled = true;
+      payButton.innerText = "...מעבר לתשלום";
+    }
+
+    try {
+      // 1. Calculate order total from your local cart helper
+      const cart = JSON.parse(localStorage.getItem('shopping_cart')) || [];
+
+      if (cart.length === 0) {
+        alert('הסל שלך ריק');
+        if (payButton) {
+          payButton.disabled = false;
+          payButton.innerText = "לתשלום";
+        }
+        return;
+      }
+
+      const totalAmount = cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
+
+      // 2. Gather customer details from input fields
+      const customerData = {
+        amount: totalAmount,
+        clientName: document.getElementById('fullName')?.value || 'לקוח',
+        clientPhone: document.getElementById('phone')?.value || '',
+        clientEmail: document.getElementById('email')?.value || ''
+      };
+
+      // 3. Call your Node.js backend payment API
+      const response = await fetch('/api/create-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(customerData)
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.url) {
+        // 4. Redirect customer directly to Meshulam's secure checkout URL
+        window.location.href = data.url;
+      } else {
+        alert('שגיאה ביצירת תהליך התשלום: ' + (data.error || 'נסה שוב מאוחר יותר'));
+        if (payButton) {
+          payButton.disabled = false;
+          payButton.innerText = "לתשלום";
+        }
+      }
+
+    } catch (err) {
+      console.error("Payment error:", err);
+      alert('אירעה שגיאה בתקשורת עם השרת');
+      if (payButton) {
+        payButton.disabled = false;
+        payButton.innerText = "לתשלום";
+      }
+    }
+  }
+</script>
+</body>
+</html>
