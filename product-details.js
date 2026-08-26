@@ -1,6 +1,3 @@
-// Global Wishlist Array
-let wishlist2 = JSON.parse(localStorage.getItem('wishlist')) || [];
-
 document.addEventListener('DOMContentLoaded', () => {
     updateWishlistBadge();
 
@@ -120,16 +117,14 @@ function renderRelatedProducts(currentProduct) {
     const section = document.querySelector('.related-products-section');
     if (!container) return;
 
-    // Load full catalog from localStorage
     const rawCatalog = JSON.parse(localStorage.getItem('allProductsCatalog')) || [];
 
     if (!rawCatalog || rawCatalog.length === 0) {
-        console.warn("⚠️ Related Products: 'allProductsCatalog' in localStorage is empty or missing!");
+        console.warn("⚠️ Related Products: 'allProductsCatalog' in localStorage is empty!");
         if (section) section.style.display = 'none';
         return;
     }
 
-    // Standardize all catalog items
     const normalizedCatalog = rawCatalog.map(item => {
         const fields = item.fields || item;
         return {
@@ -147,15 +142,14 @@ function renderRelatedProducts(currentProduct) {
     const currentCategory = extractCategoryName(currentProduct.category).toLowerCase().trim();
     const currentId = String(currentProduct.id || '');
 
-    // 1. Try exact category match (excluding current item)
+    // 1. Try matching category
     let relatedItems = normalizedCatalog.filter(item => {
         const itemCat = item.category.toLowerCase().trim();
         return itemCat === currentCategory && item.id !== currentId;
     });
 
-    // 2. FALLBACK: If no products match exact category, grab any other products from catalog
+    // 2. Fallback to general catalog if no category match found
     if (relatedItems.length === 0) {
-        console.log("ℹ️ No exact category match found. Falling back to other catalog products.");
         relatedItems = normalizedCatalog.filter(item => item.id !== currentId);
     }
 
@@ -173,8 +167,6 @@ function renderRelatedProducts(currentProduct) {
         const activePrice = item.onsale && item.saleprice ? item.saleprice : item.price;
         const isWishlisted = wishlist.some(w => String(w.id) === String(item.id));
         const heartStateClass = isWishlisted ? 'filled' : 'outline';
-        
-        // Safe JSON stringification for inline onclick
         const safeItemJSON = JSON.stringify(item).replace(/"/g, '&quot;');
 
         let priceHTML = `<div class="p-price"><span class="Price new-price">₪${item.price}</span></div>`;
