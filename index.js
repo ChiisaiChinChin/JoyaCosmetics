@@ -686,10 +686,10 @@ function goToBanner(index) {
 const dualBannersData = [
     { img: 'Banners/PishtanBanner.png', alt: 'Banner 1' , page: 'Pishtan.html'},
     { img: 'Banners/HemphaBanner.png', alt: 'Banner 2' , page: 'Hempha.html'},
-    { img: 'Banners/Coco&Honey%20Banner.png', alt: 'Banner 3' , page: 'Coco&Honey.html'},
-    { img: 'Banners/MyCollection%20Banner.png', alt: 'Banner 4' , page: 'MyCollection.html'},
-    { img: 'Banners/Keratin%20Forte%20Banner.png', alt: 'Banner 5' , page: 'KeratinForte.html'},
-    { img: 'Banners/Curls%20Banner.png', alt: 'Banner 6' , page: 'Curls.html'}
+    { img: 'Banners/Coco&Honey Banner.png', alt: 'Banner 3' , page: 'Coco&Honey.html'},
+    { img: 'Banners/MyCollection Banner.png', alt: 'Banner 4' , page: 'MyCollection.html'},
+    { img: 'Banners/Keratin Forte Banner.png', alt: 'Banner 5' , page: 'KeratinForte.html'},
+    { img: 'Banners/Curls Banner.png', alt: 'Banner 6' , page: 'Curls.html'}
 ];
 
 function renderDualBanners(items) {
