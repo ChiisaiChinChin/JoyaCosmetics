@@ -1676,11 +1676,12 @@ body.acc-colored-text td {
         flex-direction: column;
         padding: 24px 20px;
         text-align: center;
+        width: 80%;
     }
 
     .banner-image-side, 
     .banner-text-side {
-        width: 100%; /* Takes full width on mobile */
+        width: 80%; /* Takes full width on mobile */
     }
 
     .banner-image-side {
@@ -1705,6 +1706,7 @@ body.acc-colored-text td {
     .header-content {
         flex-wrap: wrap;
         justify-content: space-between;
+        padding: 10px;
     }
 
     .search-box {
