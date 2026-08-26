@@ -952,8 +952,8 @@ DUAL BANNERS CAROUSEL STYLES
 .related-products-section {
     display: block;
     width: 100%;
-    margin-top: 180%;
-    margin-bottom: 16px;
+    margin-top: 40px; /* Fixed: Changed from 180% */
+    margin-bottom: 24px;
     clear: both;
 }
 
