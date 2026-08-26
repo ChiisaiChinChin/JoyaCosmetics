@@ -243,15 +243,17 @@ footer {
     flex-direction: column;
     justify-content: space-between;
     height: 100%;
-    width: 300px;
+    width: 100%; /* Changed from 300px to 100% */
+    max-width: 320px; /* Prevents them from getting too large */
+    margin: 0 auto; /* Centers the card */
 }
 
 .product-image img {
-    max-width: 200px;
-    min-width: 150px;
-    max-height: 300px;
-    min-height: 200px;
-    object-fit: fill; /* Scales the image down without cutting off any part */
+    width: 100%; /* Fluid width */
+    max-width: 100%;
+    height: auto; /* Maintains aspect ratio */
+    max-height: 250px; /* Slightly reduced for better mobile view */
+    object-fit: contain; /* Prevents cropping */
     border-radius: var(--radius-sm);
 }
 
@@ -1653,4 +1655,90 @@ body.acc-colored-text td {
 
 .cookie-btn:hover {
     background-color: #16a34a;
+}
+
+#WishListItems {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    padding: 0;
+    margin: 5% 0;
+}
+
+/* ==========================================
+   COMPREHENSIVE MOBILE FIXES
+   ========================================== */
+
+@media (max-width: 768px) {
+    /* Stack the Hero Banner Card vertically */
+    .hero-banner-card {
+        flex-direction: column;
+        padding: 24px 20px;
+        text-align: center;
+    }
+
+    .banner-image-side, 
+    .banner-text-side {
+        width: 100%; /* Takes full width on mobile */
+    }
+
+    .banner-image-side {
+        margin-bottom: 20px;
+    }
+
+    /* Keep carousel arrows accessible on mobile */
+    .arrow-btn {
+        padding: 5px;
+    }
+    .right-arrow { right: 5px; }
+    .left-arrow { left: 5px; }
+
+    /* Adjust product details spacing */
+    .related-products-section {
+        margin-top: 40px; /* Fixed massive 180% margin gap */
+    }
+}
+
+@media (max-width: 600px) {
+    /* Wrap the header so the search bar drops to its own line */
+    .header-content {
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    .search-box {
+        order: 3; /* Pushes the search box below the logo and icons */
+        width: 100%;
+        margin-top: 12px;
+    }
+
+    .search-box input {
+        width: 100%; /* Full width search bar on mobile */
+        border-radius: 8px; /* Slightly softer corners for a full-width bar */
+    }
+
+    .logo {
+        font-size: 1.4rem; /* Slightly smaller logo for small screens */
+    }
+
+    /* Ensure product grid adapts to very small screens */
+    .products-grid-ul,
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+}
+
+@media (max-width: 400px) {
+    /* For very small devices, drop to 1 product per row */
+    .products-grid-ul,
+    .product-grid,
+    #WishListItems {
+        grid-template-columns: 1fr;
+    }
+    
+    .product-card {
+        max-width: 100%; /* Allow card to fill screen */
+    }
 }
