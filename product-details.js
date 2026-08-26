@@ -1,5 +1,5 @@
 // Global Wishlist Array
-let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+let wishlist2 = JSON.parse(localStorage.getItem('wishlist')) || [];
 
 document.addEventListener('DOMContentLoaded', () => {
     updateWishlistBadge();
