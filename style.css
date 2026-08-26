@@ -920,6 +920,54 @@ DUAL BANNERS CAROUSEL STYLES
     transform: translateX(4px);
 }
 
+/* Ensure Product Page Container Wraps Properly */
+#SingleProductView {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    width: 100%;
+}
+
+/* Fix Single Product Image Container on Mobile */
+.product-page-image {
+    width: 100%;
+    flex: 1 1 300px; /* Takes full width on mobile, side-by-side on desktop */
+    min-height: 280px; /* Stops mobile browsers from shrinking it to 0px */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f9f9f9;
+    border-radius: 12px;
+    overflow: hidden;
+    padding: 10px;
+}
+
+.product-page-image img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: 420px;
+    object-fit: contain;
+    display: block;
+}
+
+/* Ensure Related Product Images Don't Shrink */
+.product-card .product-image {
+    width: 100%;
+    height: 200px; /* Fixed height container for uniform cards */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.product-card .product-image img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+
 .product-details-card {
     display: grid;
     grid-template-columns: 1fr 1fr;
