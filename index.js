@@ -219,7 +219,6 @@ function updateWishlistBadge() {
     if (wishlistBadge) {
         wishlistBadge.textContent = wishlist.length;
     }
-    window.location.reload();
 }
 
 function syncHeartIcons() {
