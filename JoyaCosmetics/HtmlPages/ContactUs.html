@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joya Cosmetics | צור קשר</title>
+    <!-- Contentful SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/contentful@latest/dist/contentful.browser.min.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../style.css">
+
+    <!-- App JavaScript -->
+    <script src="../product-details.js"></script>
+    <script src="../index.js"></script>
+    <style>
+        :root {
+            --primary-color: #d88195;     /* Soft beauty/cosmetic accent color */
+            --primary-hover: #c46b80;
+            --bg-color: #f9f9f9;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #e0e0e0;
+        }
+
+        #Contact_Form {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            margin: 20% 0;
+        }
+
+        form label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-color);
+        }
+
+        form input[type="text"],
+        form input[type="email"],
+        form textarea {
+            width: 100%;
+            padding: 12px 14px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        form input[type="text"]:focus,
+        form input[type="email"]:focus,
+        form textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(216, 129, 149, 0.2);
+        }
+
+        form textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        form input[type="submit"]#Send {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 1.05rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        form input[type="submit"]#Send:hover {
+            background-color: var(--primary-hover);
+        }
+    </style>
+</head>
+<body>
+
+<!-- HEADER NAVIGATION -->
+<header class="header">
+    <div class="container header-content">
+        <div class="header-icons">
+            <!-- Mobile Menu Toggle -->
+            <div class="icon-btn" onclick="toggleMenu()">
+                <i class="fa-solid fa-bars"></i>
+            </div>
+
+            <!-- Shopping Cart Icon -->
+            <div class="icon-btn" onclick="OpenCart()">
+                <i class="fa-solid fa-basket-shopping"></i>
+                <span id="OpQuantity" class="badge">0</span>
+            </div>
+
+            <!-- Wishlist Icon -->
+            <a href="WishListPage.html" class="icon-btn wishlist-icon">
+                <i class="fa-regular fa-heart"></i>
+                <span class="badge">0</span>
+            </a>
+        </div>
+
+        <!-- SEARCH BAR -->
+        <div class="search-box">
+            <input type="text" id="Search" placeholder="חפש מוצרים...">
+        </div>
+
+        <div class="logo">JOYA COSMETICS</div>
+    </div>
+</header>
+
+<!-- SHOPPING CART SIDEBAR / MODAL -->
+<div id="Cart" class="cart-modal">
+    <div class="cart-content">
+        <div class="cart-header">
+            <h2>סל הקניות</h2>
+            <button class="close-cart" onclick="CloseCart()">&times;</button>
+        </div>
+
+        <ul id="CartItems" class="cart-items-list">
+            <!-- Rendered dynamically via JavaScript -->
+        </ul>
+
+        <div class="cart-footer">
+            <div id="Cost" class="total-cost">סך הכל: ₪0</div>
+            <button class="btn-checkout">למעבר לתשלום</button>
+        </div>
+    </div>
+</div>
+
+<main class="container">
+    <fieldset id="Contact_Form">
+        <form id="contactForm">
+            <!-- Replace with the Access Key sent to your email -->
+            <input type="hidden" name="access_key" value="0b221ca8-e11c-4721-838f-2962f4c75464">
+
+            <label for="firstName">השם שלך:</label>
+            <input type="text" id="firstName" name="name" required placeholder="הכנס שם מלא">
+
+            <label for="email">אימייל:</label>
+            <input type="email" id="email" name="email" required placeholder="example@domain.com">
+
+            <label for="message">הודעה:</label>
+            <textarea id="message" name="message" required placeholder="איך נוכל לעזור?"></textarea>
+
+            <input type="submit" id="Send" value="שלח הודעה">
+        </form>
+        <p id="statusMessage" style="display:none; text-align:center; font-weight:bold; margin-top:15px;"></p>
+    </fieldset>
+</main>
+
+
+<!-- SIDE MENU OVERLAY & DRAWER -->
+<div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
+<aside id="sideMenu" class="side-menu">
+    <div class="menu-header">
+        <h3>תפריט</h3>
+        <button class="close-menu" onclick="toggleMenu()">&times;</button>
+    </div>
+    <ul class="menu-links">
+        <li><a href="index.html">דף הבית</a></li>
+        <li><a href="WishListPage.html">מוצרים שאהבת</a></li>
+        <li class="has-dropdown">
+            <span onclick="toggleDropdown(this)">מותגי החברה<i class="fa-solid fa-chevron-down"></i></span>
+            <ul class="dropdown">
+                <li><a href="Argan.html">סדרת ארגן</a></li>
+                <li><a href="Coco&Honey.html">סדרת דבש וקוקוס</a></li>
+                <li><a href="Curls.html">הסדרה למתולתלות</a></li>
+                <li><a href="Hempha.html">המפה</a></li>
+                <li><a href="KeratinForte.html">קרטין פורטה</a></li>
+                <li><a href="MyCollection.html">my collection</a></li>
+                <li><a href="Pishtan.html">סדרת זרעי פשתן</a></li>
+            </ul>
+        </li>
+        <li class="has-dropdown">
+            <span onclick="toggleDropdown(this)">קטגוריות <i class="fa-solid fa-chevron-down"></i></span>
+            <ul class="dropdown">
+                <li><a href="HairMasks.html">מסכות הזנה</a></li>
+                <li><a href="Conditioners.html">כל המרככים</a></li>
+                <li><a href="Shampoo.html">כל השמפו</a></li>
+                <li><a href="Serums.html">כל הסרומים</a></li>
+                <li><a href="Moisturizings.html">כל קרמי הלחות</a></li>
+            </ul>
+        </li>
+        <li><a href="AboutUs.html">אודותינו</a></li>
+        <li><a href="DeliveryPolicy.html">מדיניות משלוחים</a></li>
+        <li><a href="WebsiteRegulations.html">תקנון האתר</a></li>
+        <li><a href="ContactUs.html">צור קשר</a></li>
+        <li><a href="WebsiteRegulations.html">הצהרת נגישות</a></li>
+    </ul>
+</aside>
+<!-- Cookie & Regulations Popup -->
+<div id="cookieBanner" class="cookie-banner hidden">
+    <div class="cookie-content">
+        <p>
+            אנו משתמשים בעוגיות (Cookies) ומבקשים את הסכמתך ל<a href="../HtmlPages/WebsiteRegulations.html" target="_blank" class="cookie-link">תקנון האתר, מדיניות הפרטיות והצהרת הנגישות</a>.
+        </p>
+        <button id="acceptCookiesBtn" class="cookie-btn">אני מסכים/ה</button>
+    </div>
+</div>
+<!-- FOOTER -->
+<footer class="footer">
+    <div class="container footer-grid">
+        <div class="footer-col">
+            <h3>JOYA COSMETICS</h3>
+            <p style="font-size:0.85rem; color:#ebdcd7; margin-bottom:12px;">הרשמו לניוזלטר לקבלת עדכונים ומבצעים בלעדיים</p>
+            <input type="email" placeholder="דוא״ל לקבלת עדכונים" class="newsletter-input">
+        </div>
+        <div class="footer-col">
+            <h3>מפת אתר</h3>
+            <ul class="footer-links">
+                <li><a href="AboutUs.html">אודותינו</a></li>
+                <li><a href="DeliveryPolicy.html">מדיניות משלוחים</a></li>
+                <li><a href="WebsiteRegulations.html#Regulations">תקנון האתר</a></li>
+                <li><a href="ContactUs.html">צור קשר</a></li>
+                <li><a href="WebsiteRegulations.html#AccessabilityPolicy">הצהרת נגישות</a></li>
+                <li><a href="WebsiteRegulations.html#PrivacyPolicy">תקנון פרטיות</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h3>מותגי החברה</h3>
+            <ul class="footer-links">
+                <li><a href="Argan.html">ARGAN SECRET | סדרת ארגן</a></li>
+                <li><a href="Coco&Honey.html">COCO&HONEY | סדרת דבש וקוקוס</a></li>
+                <li><a href="Curls.html">CURLS | הסדרה למתולתלות</a></li>
+                <li><a href="Hempha.html">HEMPHA | המפה</a></li>
+                <li><a href="KeratinForte.html">KERATIN FORTE | קרטין פורטה</a></li>
+                <li><a href="MyCollection.html">MY COLLECTION</a></li>
+                <li><a href="Pishtan.html">FLAX SEED | סדרת זרעי פשתן</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h3>קטגוריות נוספות</h3>
+            <ul class="footer-links">
+                <li><a href="HairMasks.html">מסכות הזנה לשיער</a></li>
+                <li><a href="Conditioners.html">המרככים</a></li>
+                <li><a href="Shampoo.html">שמפו</a></li>
+                <li><a href="Serums.html">סרומים</a></li>
+                <li><a href="Moisturizings.html">קרמי הלחות</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h3>מדיה</h3>
+            <ul class="footer-links">
+                <img class='Icon' src="../Pictures/Facebook-Logo-1--Streamline-Ultimate.png" height="30" width="30" onclick="window.open('https://www.facebook.com/Joya.Cosmetics/about/', '_blank');"/>
+                <img class='Icon' src="../Pictures/Instagram-Logo--Streamline-Ultimate.png" height="30" width="30" onclick="window.open('https://www.instagram.com/joya_cosmetics/', '_blank');"/>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom container">
+        <p>© כל הזכויות שמורות ל-JOYA COSMETICS</p>
+    </div>
+</footer>
+<script>
+    const form = document.getElementById('contactForm');
+    const statusMessage = document.getElementById('statusMessage');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        statusMessage.style.display = 'block';
+        statusMessage.style.color = '#333';
+        statusMessage.textContent = 'שולח...';
+
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch('https://api.web3forms.com/submit', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                statusMessage.style.color = 'green';
+                statusMessage.textContent = 'ההודעה נשלחה בהצלחה!';
+                form.reset();
+            } else {
+                statusMessage.style.color = 'red';
+                statusMessage.textContent = 'שגיאה: ' + data.message;
+            }
+        } catch (error) {
+            statusMessage.style.color = 'red';
+            statusMessage.textContent = 'אירעה שגיאה. אנא נסה שוב.';
+        }
+    });
+</script>
+</body>
+</html>
