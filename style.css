@@ -70,7 +70,163 @@ footer {
     flex-shrink: 0;
     margin-top: auto;
 }
+/* ==========================================
+   PRODUCT DETAILS PAGE STYLES
+   ========================================== */
 
+.product-details-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 20px 60px;
+    direction: rtl; /* Ensures RTL flow for Hebrew text */
+}
+
+/* Back Button */
+.back-btn {
+    background: transparent;
+    border: none;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--primary-brown, #8b5a2b);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.back-btn:hover {
+    background-color: rgba(139, 90, 43, 0.08);
+    transform: translateX(4px);
+}
+
+/* Ensure Product Page Container Wraps Properly */
+#SingleProductView {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    width: 100%;
+}
+
+/* Fix Single Product Image Container on Mobile */
+.product-page-image {
+    width: 100%;
+    flex: 1 1 300px; /* Takes full width on mobile, side-by-side on desktop */
+    min-height: 280px; /* Stops mobile browsers from shrinking it to 0px */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f9f9f9;
+    border-radius: 12px;
+    overflow: hidden;
+    padding: 10px;
+}
+
+.product-page-image img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: 420px;
+    object-fit: contain;
+    display: block;
+}
+
+/* Ensure Related Product Images Don't Shrink */
+.product-card .product-image {
+    width: 100%;
+    height: 200px; /* Fixed height container for uniform cards */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.product-card .product-image img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+
+.product-details-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: "image details"; /* "details" on Left (col 1 in LTR/col 2 in RTL), "image" on Right */
+    gap: 40px;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    margin-bottom: 60px;
+    direction: rtl;
+}
+
+/* Bind image to the right area */
+.product-details-card img {
+    grid-area: image;
+    width: 100%;
+    max-height: 480px;
+    object-fit: contain;
+    border-radius: 12px;
+    background-color: #fafafa;
+}
+
+/* Bind info text to the left area */
+.product-page-info {
+    grid-area: details;
+}
+
+/* Related Products Section */
+.related-products-section {
+    display: block;
+    width: 100%;
+    margin-top: 40px; /* Fixed: Changed from 180% */
+    margin-bottom: 24px;
+    clear: both;
+}
+
+#RelatedProductsList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.related-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-dark, #2c2c2c);
+    margin-bottom: 24px;
+    text-align: right;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.related-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 60px;
+    height: 3px;
+    background-color: var(--primary-brown, #8b5a2b);
+    border-radius: 2px;
+}
+
+/* Related Products Grid Container */
+.products-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+}
 /* --- HEADER & SEARCH --- */
 .header {
     background-color: var(--primary-brown);
@@ -887,163 +1043,6 @@ DUAL BANNERS CAROUSEL STYLES
     line-height: 1.2;
 }
 
-/* ==========================================
-   PRODUCT DETAILS PAGE STYLES
-   ========================================== */
-
-.product-details-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 24px 20px 60px;
-    direction: rtl; /* Ensures RTL flow for Hebrew text */
-}
-
-/* Back Button */
-.back-btn {
-    background: transparent;
-    border: none;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--primary-brown, #8b5a2b);
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 24px;
-    padding: 8px 12px;
-    border-radius: 8px;
-    transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-.back-btn:hover {
-    background-color: rgba(139, 90, 43, 0.08);
-    transform: translateX(4px);
-}
-
-/* Ensure Product Page Container Wraps Properly */
-#SingleProductView {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 24px;
-    width: 100%;
-}
-
-/* Fix Single Product Image Container on Mobile */
-.product-page-image {
-    width: 100%;
-    flex: 1 1 300px; /* Takes full width on mobile, side-by-side on desktop */
-    min-height: 280px; /* Stops mobile browsers from shrinking it to 0px */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #f9f9f9;
-    border-radius: 12px;
-    overflow: hidden;
-    padding: 10px;
-}
-
-.product-page-image img {
-    width: 100%;
-    max-width: 100%;
-    height: auto;
-    max-height: 420px;
-    object-fit: contain;
-    display: block;
-}
-
-/* Ensure Related Product Images Don't Shrink */
-.product-card .product-image {
-    width: 100%;
-    height: 200px; /* Fixed height container for uniform cards */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.product-card .product-image img {
-    max-width: 100%;
-    max-height: 100%;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-}
-
-.product-details-card {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-areas: "image details"; /* "details" on Left (col 1 in LTR/col 2 in RTL), "image" on Right */
-    gap: 40px;
-    background: #ffffff;
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    margin-bottom: 60px;
-    direction: rtl;
-}
-
-/* Bind image to the right area */
-.product-details-card img {
-    grid-area: image;
-    width: 100%;
-    max-height: 480px;
-    object-fit: contain;
-    border-radius: 12px;
-    background-color: #fafafa;
-}
-
-/* Bind info text to the left area */
-.product-page-info {
-    grid-area: details;
-}
-
-/* Related Products Section */
-.related-products-section {
-    display: block;
-    width: 100%;
-    margin-top: 40px; /* Fixed: Changed from 180% */
-    margin-bottom: 24px;
-    clear: both;
-}
-
-#RelatedProductsList {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 20px;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.related-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--text-dark, #2c2c2c);
-    margin-bottom: 24px;
-    text-align: right;
-    position: relative;
-    padding-bottom: 10px;
-}
-
-.related-title::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 60px;
-    height: 3px;
-    background-color: var(--primary-brown, #8b5a2b);
-    border-radius: 2px;
-}
-
-/* Related Products Grid Container */
-.products-grid {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 20px;
-}
 
 /* ==========================================
    RESPONSIVE LAYOUT (Mobile & Tablet)
