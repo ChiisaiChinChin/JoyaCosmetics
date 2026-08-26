@@ -1,5 +1,5 @@
 // Global Wishlist Array
-//let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
 
 document.addEventListener('DOMContentLoaded', () => {
     updateWishlistBadge();
@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     console.log("🔍 DEBUG - Selected Product in sessionStorage:", rawSelected ? JSON.parse(rawSelected) : "EMPTY / NULL");
     console.log("🔍 DEBUG - Catalog items in localStorage:", rawCatalog ? JSON.parse(rawCatalog).length + " items" : "EMPTY / NULL");
-    // ------------------
 
     if (!container) {
         console.error("❌ Could not find element with id='SingleProductView' in product.html!");
@@ -37,6 +36,28 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ==========================================
+   HELPERS: CATEGORY & IMAGE PARSING
+   ========================================== */
+function extractCategoryName(cat) {
+    if (!cat) return 'Product';
+    if (typeof cat === 'object') {
+        return cat.fields?.title || cat.fields?.name || cat.sys?.id || 'Product';
+    }
+    return String(cat).trim();
+}
+
+function formatImageUrl(url) {
+    if (!url) return 'Pictures/placeholder.png';
+    if (typeof url === 'object') {
+        url = url.fields?.file?.url || '';
+    }
+    if (typeof url === 'string' && url.startsWith('//')) {
+        return 'https:' + url;
+    }
+    return url;
+}
+
+/* ==========================================
    1. SINGLE PRODUCT VIEW
    ========================================== */
 function renderSingleProduct(item) {
@@ -48,9 +69,9 @@ function renderSingleProduct(item) {
     const isOnSale = item.onsale === true || item.onsale === "true" || item.onSale === true;
     const salePrice = (item.saleprice !== undefined && item.saleprice !== "") ? item.saleprice : price;
     const about = item.about || name;
-    const Category = item.category || 'Product';
+    const Category = extractCategoryName(item.category);
     const id = item.id;
-    const imageUrl = item.img || item.image || '';
+    const imageUrl = formatImageUrl(item.img || item.image || item.pic);
 
     const activePrice = isOnSale ? salePrice : price;
     const safeName = name.replace(/'/g, "\\'");
@@ -76,24 +97,24 @@ function renderSingleProduct(item) {
     }
 
     container.innerHTML = `
-            <div class="product-page-image">
-                <img src="${imageUrl}" alt="${name}">
-            </div>
-            <div class="product-page-info">
-                <h1>${name}</h1>
-                <p class="description">${about}</p>
-                ${priceHTML}
+        <div class="product-page-image">
+            <img src="${imageUrl}" alt="${name}">
+        </div>
+        <div class="product-page-info">
+            <h1>${name}</h1>
+            <p class="description">${about}</p>
+            ${priceHTML}
 
-                <div class="p-actions">
-                    <button class="add-to-cart AddToCart" onclick="AddCartItem('${safeName}', '${id}', '${activePrice}', '${imageUrl}')">
-                        הוסף לסל
-                    </button>
-                    <i class="fa-heart wishlist-heart ${heartStateClass}" 
-                       data-id="${id}" 
-                       onclick="toggleWishlist(this, { id: '${id}', name: '${safeName}', price: ${price}, img: '${imageUrl}', category: '${Category}', onsale: ${isOnSale}, saleprice: '${salePrice}' })">
-                    </i>
-                </div>
+            <div class="p-actions">
+                <button class="add-to-cart AddToCart" onclick="AddCartItem('${safeName}', '${id}', '${activePrice}', '${imageUrl}')">
+                    הוסף לסל
+                </button>
+                <i class="fa-heart wishlist-heart ${heartStateClass}" 
+                   data-id="${id}" 
+                   onclick="toggleWishlist(this, { id: '${id}', name: '${safeName}', price: ${price}, img: '${imageUrl}', category: '${Category}', onsale: ${isOnSale}, saleprice: '${salePrice}' })">
+                </i>
             </div>
+        </div>
     `;
 }
 
@@ -113,7 +134,7 @@ function renderRelatedProducts(currentProduct) {
         return;
     }
 
-    // Standardize catalog array (handles Contentful fields wrapper or raw objects)
+    // Standardize catalog array
     const normalizedCatalog = rawCatalog.map(item => {
         const fields = item.fields || item;
         return {
@@ -122,18 +143,18 @@ function renderRelatedProducts(currentProduct) {
             price: fields.price || 0,
             saleprice: fields.saleprice || fields.salePrice || '',
             onsale: fields.onsale === true || fields.onSale === true,
-            category: fields.category || fields.Category || 'Product',
+            category: extractCategoryName(fields.category || fields.Category),
             about: fields.about || fields.name || '',
-            img: fields.pic?.fields?.file?.url ? `https:${fields.pic.fields.file.url}` : (fields.img || fields.image || '')
+            img: formatImageUrl(fields.pic || fields.img || fields.image)
         };
     });
 
     // Filter items with matching category (excluding current item)
-    const currentCategory = String(currentProduct.category || '').trim().toLowerCase();
+    const currentCategory = extractCategoryName(currentProduct.category).toLowerCase();
     const currentId = String(currentProduct.id || '');
 
     const relatedItems = normalizedCatalog.filter(item => {
-        const itemCategory = String(item.category || '').trim().toLowerCase();
+        const itemCategory = extractCategoryName(item.category).toLowerCase();
         const itemId = String(item.id || '');
         return itemCategory === currentCategory && itemId !== currentId;
     });
@@ -152,6 +173,7 @@ function renderRelatedProducts(currentProduct) {
         const activePrice = item.onsale && item.saleprice ? item.saleprice : item.price;
         const isWishlisted = wishlist.some(w => String(w.id) === String(item.id));
         const heartStateClass = isWishlisted ? 'filled' : 'outline';
+        const safeItemJSON = JSON.stringify(item).replace(/"/g, '&quot;');
 
         let priceHTML = `<div class="p-price"><span class="Price new-price">₪${item.price}</span></div>`;
         if (item.onsale && item.saleprice) {
@@ -165,36 +187,36 @@ function renderRelatedProducts(currentProduct) {
 
         return `
         <li>
-                        <div class="product-card no-border" id="${item.id}">
-                            <div class="product-image">
-                                <img class="ProductImg" 
-                                     onclick='goToProductPage(${safeItemJSON})' 
-                                     alt="${item.category}" 
-                                     src="${item.img}" 
-                                     style="cursor: pointer;" />
-                            </div>
-                            <div class="product-info">
-                                <p class="p-name About" 
-                                   onclick='goToProductPage(${safeItemJSON})' 
-                                   style="cursor: pointer;">
-                                   ${item.about}
-                                </p>
-                                <p class="p-category AboutInv">${item.category}</p>
-        
-                                ${priceHTML}
-        
-                                <div class="p-actions">
-                                    <button class="add-to-cart AddToCart" name="${item.id}" onclick="AddCartItem('${safeTitle}', '${item.id}', '${activePrice}', '${item.img}')">
-                                        הוסף לסל
-                                    </button>
-                                    <i class="fa-heart wishlist-heart ${heartStateClass}" 
-                                        data-id="${id}" 
-                                        onclick="toggleWishlist(this, { id: '${id}', name: '${safeName}', price: ${price}, img: '${img}', category: '${category}', onsale: ${isOnSale}, saleprice: '${salePrice}' })">
-                                    </i>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
+            <div class="product-card no-border" id="${item.id}">
+                <div class="product-image">
+                    <img class="ProductImg" 
+                         onclick="goToProductPage(${safeItemJSON})" 
+                         alt="${item.category}" 
+                         src="${item.img}" 
+                         style="cursor: pointer;" />
+                </div>
+                <div class="product-info">
+                    <p class="p-name About" 
+                       onclick="goToProductPage(${safeItemJSON})" 
+                       style="cursor: pointer;">
+                       ${item.about}
+                    </p>
+                    <p class="p-category AboutInv">${item.category}</p>
+    
+                    ${priceHTML}
+    
+                    <div class="p-actions">
+                        <button class="add-to-cart AddToCart" name="${item.id}" onclick="AddCartItem('${safeTitle}', '${item.id}', '${activePrice}', '${item.img}')">
+                            הוסף לסל
+                        </button>
+                        <i class="fa-heart wishlist-heart ${heartStateClass}" 
+                            data-id="${item.id}" 
+                            onclick="toggleWishlist(this, { id: '${item.id}', name: '${safeTitle}', price: ${item.price}, img: '${item.img}', category: '${item.category}', onsale: ${item.onsale}, saleprice: '${item.saleprice}' })">
+                        </i>
+                    </div>
+                </div>
+            </div>
+        </li>
         `;
     }).join('');
 }
