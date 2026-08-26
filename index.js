@@ -9,6 +9,8 @@ let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
 var currentPath = "";
 
 async function fetchProducts() {
+    // Add this inside your index.js fetch callback:
+    localStorage.setItem('allProductsCatalog', JSON.stringify(response.items));
     console.log("1. fetchProducts() function has started running...");
     try {
         const response = await client.getEntries({
