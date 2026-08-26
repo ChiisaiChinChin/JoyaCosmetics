@@ -12,25 +12,16 @@
     --radius-lg: 16px;
 }
 
-/* Apply globally to the entire body */
-body {
-    font-family: 'Suranna', sans-serif;
-}
-
-/* Or apply to specific headings */
-h1, h2, h3 {
-    font-family: 'Suranna', sans-serif;
-    scroll-margin-top: 100px;
-}
-
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    /* Removed font-family here to prevent overriding body/headings */
 }
 
+/* Apply globally to the body */
 body {
+    font-family: 'Suranna', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: var(--bg-light);
     color: var(--text-dark);
     line-height: 1.5;
@@ -38,6 +29,11 @@ body {
     display: flex;
     flex-direction: column;
     margin: 0;
+}
+
+h1, h2, h3 {
+    font-family: 'Suranna', serif;
+    scroll-margin-top: 100px;
 }
 
 body.no-scroll {
@@ -1635,10 +1631,13 @@ body.acc-colored-text td {
     padding: 14px;
     border-radius: 8px;
     font-weight: bold;
-    font-size: 1.05rem;
+    font-size: 1rem;
     cursor: pointer;
     transition: background-color 0.2s ease;
-    margin-top: 5px;
+}
+
+.primary-btn:hover {
+    background-color: #c46b80;
 }
 
 .primary-btn:hover {
