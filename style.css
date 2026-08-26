@@ -1709,7 +1709,7 @@ body.acc-colored-text td {
 
     .search-box {
         order: 3; /* Pushes the search box below the logo and icons */
-        width: 100%;
+        width: 80%;
         margin-top: 12px;
     }
 
@@ -1720,6 +1720,7 @@ body.acc-colored-text td {
 
     .logo {
         font-size: 1.4rem; /* Slightly smaller logo for small screens */
+        margin-left: 12px;
     }
 
     /* Ensure product grid adapts to very small screens */
@@ -1727,6 +1728,7 @@ body.acc-colored-text td {
     .product-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 12px;
+        margin: 10px;
     }
 }
 
@@ -1739,6 +1741,6 @@ body.acc-colored-text td {
     }
     
     .product-card {
-        max-width: 100%; /* Allow card to fill screen */
+        max-width: 90%; /* Allow card to fill screen */
     }
 }
