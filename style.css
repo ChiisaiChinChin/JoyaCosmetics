@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Suranna&display=swap');
+
 :root {
     --primary-brown: #8a5a4d;
     --dark-brown: #6b4338;
@@ -9,8 +11,6 @@
     --radius-sm: 8px;
     --radius-lg: 16px;
 }
-
-@import url('https://fonts.googleapis.com/css2?family=Suranna&display=swap');
 
 /* Apply globally to the entire body */
 body {
@@ -141,6 +141,14 @@ footer {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.product-card:Hover{
+    cursor: pointer;
+}
+
+.product-image:Hover{
+    cursor: pointer;
 }
 
 .product-card .product-image img {
