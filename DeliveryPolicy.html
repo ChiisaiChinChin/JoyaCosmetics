@@ -64,6 +64,26 @@
          לכל בעיה שנתקלתם בה אנא <a href="ContactUs.html">צרו קשר</a> בעמוד צור קשר של האתר וציינו את הבעיה ונפנה לעזור לכם בהקדם.
     </p>
 </main>
+
+<!-- SHOPPING CART SIDEBAR / MODAL -->
+<div id="Cart" class="cart-modal">
+    <div class="cart-content">
+        <div class="cart-header">
+            <h2>סל הקניות</h2>
+            <button class="close-cart" onclick="CloseCart()">&times;</button>
+        </div>
+
+        <ul id="CartItems" class="cart-items-list">
+            <!-- Rendered dynamically via JavaScript -->
+        </ul>
+
+        <div class="cart-footer">
+            <div id="Cost" class="total-cost">סך הכל: ₪0</div>
+            <button class="btn-checkout" onclick="window.location.href='CheckOutPage.html'">למעבר לתשלום</button>
+        </div>
+    </div>
+</div>
+
 <!-- SIDE MENU OVERLAY & DRAWER -->
 <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
 <aside id="sideMenu" class="side-menu">

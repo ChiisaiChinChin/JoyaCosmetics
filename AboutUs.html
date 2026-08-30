@@ -74,6 +74,25 @@
     <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3387.566747488067!2d34.7366935596487!3d31.891195328835074!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1502b4ca1f18a351%3A0x662016537feb0650!2z15In15XXmdeUINen15XXodee15jXmden16EgSm95YSBDb3NtZXRpY3M!5e0!3m2!1siw!2sil!4v1786003393594!5m2!1siw!2sil" width="800" height="600" style="border:0; margin: 10% 0" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </main>
 
+<!-- SHOPPING CART SIDEBAR / MODAL -->
+<div id="Cart" class="cart-modal">
+    <div class="cart-content">
+        <div class="cart-header">
+            <h2>סל הקניות</h2>
+            <button class="close-cart" onclick="CloseCart()">&times;</button>
+        </div>
+
+        <ul id="CartItems" class="cart-items-list">
+            <!-- Rendered dynamically via JavaScript -->
+        </ul>
+
+        <div class="cart-footer">
+            <div id="Cost" class="total-cost">סך הכל: ₪0</div>
+            <button class="btn-checkout" onclick="window.location.href='CheckOutPage.html'">למעבר לתשלום</button>
+        </div>
+    </div>
+</div>
+
 <!-- SIDE MENU OVERLAY & DRAWER -->
 <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
 <aside id="sideMenu" class="side-menu">
