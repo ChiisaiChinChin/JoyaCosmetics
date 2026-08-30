@@ -1063,3 +1063,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+async function processPayment(orderData) {
+    try {
+        const response = await fetch('YOUR_MAKE_WEBHOOK_URL', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                amount: orderData.price,
+                itemName: orderData.name,
+                orderId: orderData.id,
+                customerEmail: orderData.email || ''
+            })
+        });
+
+        const data = await response.json();
+        if (data.paymentUrl) {
+            window.location.href = data.paymentUrl;
+        } else {
+            alert('Unable to generate payment link. Please try again.');
+        }
+    } catch (error) {
+        console.error('Payment Error:', error);
+    }
+}
