@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="style.css">
 
     <!-- App JavaScript -->
-    <script src="index.js"></script>
+    <script src="index.js" defer></script>
 </head>
 <body>
 
@@ -45,6 +45,7 @@
         <div class="logo">JOYA COSMETICS</div>
     </div>
 </header>
+
 <!-- SHOPPING CART SIDEBAR / MODAL -->
 <div id="Cart" class="cart-modal">
     <div class="cart-content">
@@ -67,14 +68,17 @@
 <main class="product-details-container">
     <!-- Back Button -->
     <button class="back-btn" onclick="history.back()">&rarr; חזרה </button>
+    
     <!-- Main Product View -->
     <div id="SingleProductView" class="product-details-card"></div>
 
-    <!-- Related Products Section -->
+    <!-- Related Products Section Wrapper -->
+    <section class="related-products-section">
         <h2 class="related-title">מוצרים נוספים בקטגוריה זו</h2>
         <ul id="RelatedProductsList" class="products-grid">
             <!-- Related product cards will render here -->
         </ul>
+    </section>
 </main>
 
 <!-- SIDE MENU OVERLAY & DRAWER -->
@@ -116,6 +120,7 @@
         <li><a href="WebsiteRegulations.html">הצהרת נגישות</a></li>
     </ul>
 </aside>
+
 <!-- Cookie & Regulations Popup -->
 <div id="cookieBanner" class="cookie-banner hidden">
     <div class="cookie-content">
@@ -125,6 +130,7 @@
         <button id="acceptCookiesBtn" class="cookie-btn">אני מסכים/ה</button>
     </div>
 </div>
+
 <!-- FOOTER -->
 <footer class="footer">
     <div class="container footer-grid">
@@ -178,6 +184,8 @@
         <p>© כל הזכויות שמורות ל-JOYA COSMETICS</p>
     </div>
 </footer>
-        <script src="product-details.js"></script>
+
+    <!-- Product Specific Script (Ensure filename matches product-details.js or product.js) -->
+    <script src="product-details.js"></script>
 </body>
 </html>
