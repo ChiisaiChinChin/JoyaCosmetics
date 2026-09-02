@@ -584,7 +584,7 @@ function renderCart() {
 
         const Pprice = document.createElement("p");
         Pprice.className = "cart-item-price";
-        Pprice.textContent = `${item.quantity} x ₪${item.price} = ₪${itemTotalCost}`;
+        Pprice.textContent = ` x ₪${item.price} = ₪${itemTotalCost} ${item.quantity}`;
 
         detailsContainer.appendChild(Pname);
         detailsContainer.appendChild(Pprice);
