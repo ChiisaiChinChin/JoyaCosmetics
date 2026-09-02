@@ -1220,6 +1220,7 @@ async function handleCheckout(event) {
     const address   = document.getElementById('custAddress')?.value.trim() || '';
     const Phone   = document.getElementById('custPhone').value.trim();
 
+
     const cart = getCart();
 
     if (!cart || cart.length === 0) {
@@ -1241,6 +1242,7 @@ async function handleCheckout(event) {
             name: item.name || item.title,
             price: Number(item.price),
             quantity: Number(item.quantity || 1),
+            c_qty: Number(item.quantity || 1),
             vatType: 1,
             url: rawImg
         };
