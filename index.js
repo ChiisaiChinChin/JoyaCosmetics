@@ -526,8 +526,21 @@ function getCart() {
 }
 
 function saveCart(cart) {
-    localStorage.setItem("shopping_cart", JSON.stringify(cart));
-    localStorage.setItem("cart", JSON.stringify(cart)); // Mirror for checkout compatibility
+    // 1. Ensure every item has both `quantity` and `qty` for Grow checkout compatibility
+    const normalizedCart = cart.map(item => ({
+        ...item,
+        quantity: Number(item.quantity || item.qty || 1),
+        qty: Number(item.quantity || item.qty || 1) // Grow checkout compatibility
+    }));
+
+    // 2. Save mirror keys for checkout scripts
+    localStorage.setItem("shopping_cart", JSON.stringify(normalizedCart));
+    localStorage.setItem("cart", JSON.stringify(normalizedCart));
+
+    // 3. Recalculate total quantity badge
+    const totalQty = normalizedCart.reduce((sum, item) => sum + item.quantity, 0);
+    localStorage.setItem("OpCartQ", totalQty);
+    updateCartQuantity(totalQty);
 }
 
 function addToCart(name, id, price, src) {
@@ -536,7 +549,9 @@ function addToCart(name, id, price, src) {
     const existingItem = cart.find(item => String(item.id) === String(id));
 
     if (existingItem) {
-        existingItem.quantity = (existingItem.quantity || 1) + 1;
+        const newQty = (existingItem.quantity || existingItem.qty || 1) + 1;
+        existingItem.quantity = newQty;
+        existingItem.qty = newQty;
         existingItem.price = Number(price);
     } else {
         cart.push({
@@ -546,9 +561,9 @@ function addToCart(name, id, price, src) {
             price: Number(price),
             src: src,
             image: src,
-            quantity: 1
+            quantity: 1,
+            qty: 1 // Dual naming for Grow
         });
-        AddQuantity();
     }
 
     saveCart(cart);
@@ -565,6 +580,8 @@ function renderCart() {
     let totalCartSum = 0;
 
     cart.forEach(item => {
+        const itemQty = Number(item.quantity || item.qty || 1);
+
         const li = document.createElement("li");
         li.className = "cart-item";
 
@@ -579,13 +596,13 @@ function renderCart() {
         Pname.className = "cart-item-name";
         Pname.textContent = item.name || item.title;
 
-        const itemTotalCost = item.price * item.quantity;
+        const itemTotalCost = item.price * itemQty;
         totalCartSum += itemTotalCost;
 
         const Pprice = document.createElement("p");
         Pprice.className = "cart-item-price";
 
-        Pprice.textContent = `${item.quantity} x ₪${item.price} = ₪${itemTotalCost} `;
+        Pprice.textContent = `${itemQty} x ₪${item.price} = ₪${itemTotalCost} `;
 
         detailsContainer.appendChild(Pname);
         detailsContainer.appendChild(Pprice);
@@ -599,7 +616,7 @@ function renderCart() {
 
         const Quantity = document.createElement("p");
         Quantity.className = "cart-item-qty-text";
-        Quantity.textContent = item.quantity;
+        Quantity.textContent = itemQty;
 
         const Minus = document.createElement("button");
         Minus.textContent = "-";
@@ -613,28 +630,33 @@ function renderCart() {
         li.appendChild(detailsContainer);
         li.appendChild(controlsColumn);
 
+        // Minus click handler
         Minus.addEventListener("click", function () {
             let currentCart = getCart();
             let foundItem = currentCart.find(i => String(i.id) === String(item.id));
 
             if (foundItem) {
-                foundItem.quantity -= 1;
-                SubtractQuantity();
-                if (foundItem.quantity <= 0) {
+                let currentQty = (foundItem.quantity || foundItem.qty || 1) - 1;
+                if (currentQty <= 0) {
                     currentCart = currentCart.filter(i => String(i.id) !== String(item.id));
+                } else {
+                    foundItem.quantity = currentQty;
+                    foundItem.qty = currentQty;
                 }
                 saveCart(currentCart);
                 renderCart();
             }
         });
 
+        // Plus click handler
         Plus.addEventListener("click", function () {
             let currentCart = getCart();
             let foundItem = currentCart.find(i => String(i.id) === String(item.id));
 
             if (foundItem) {
-                foundItem.quantity += 1;
-                AddQuantity()
+                let currentQty = (foundItem.quantity || foundItem.qty || 1) + 1;
+                foundItem.quantity = currentQty;
+                foundItem.qty = currentQty;
                 saveCart(currentCart);
                 renderCart();
             }
@@ -645,9 +667,9 @@ function renderCart() {
 
     if (OverAll) {
         if (totalCartSum < 200 && totalCartSum > 0) {
-            OverAll.innerHTML = `סך הכל: ₪${totalCartSum} <!--<p class="shipping-notice">בקניה מעל ₪200 משלוח חינם</p>-->`;
+            OverAll.innerHTML = `סך הכל: ₪${totalCartSum}`;
         } else if (totalCartSum >= 200) {
-            OverAll.innerHTML = `סך הכל: ₪${totalCartSum} <!--<p class="shipping-notice">* משלוח חינם</p>-->`;
+            OverAll.innerHTML = `סך הכל: ₪${totalCartSum}`;
         } else {
             OverAll.innerHTML = `סך הכל: ₪0`;
         }
