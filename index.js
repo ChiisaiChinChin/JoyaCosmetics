@@ -415,7 +415,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let query = this.value.trim();
 
             // Select products from both #ItemsList and #productGrid / .product-grid
-            let listItems = document.querySelectorAll('#ItemsList li, #productGrid li, .product-grid li, .product-grid > *');
+            let listItems = document.querySelectorAll('#ItemsList li, #productGrid li, .product-grid li, .product-grid, #WishListItems> *');
 
             // Hide/Show Banners and Categories if they exist on the current page
             if (query.length > 0) {
@@ -619,8 +619,8 @@ function renderCart() {
 
             if (foundItem) {
                 foundItem.quantity -= 1;
+                SubtractQuantity();
                 if (foundItem.quantity <= 0) {
-                    SubtractQuantity();
                     currentCart = currentCart.filter(i => String(i.id) !== String(item.id));
                 }
                 saveCart(currentCart);
@@ -634,6 +634,7 @@ function renderCart() {
 
             if (foundItem) {
                 foundItem.quantity += 1;
+                AddQuantity()
                 saveCart(currentCart);
                 renderCart();
             }
