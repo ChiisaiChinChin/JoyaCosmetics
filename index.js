@@ -1240,9 +1240,8 @@ async function handleCheckout(event) {
 
         return {
             name: item.name || item.title,
-            price: Number(item.price),
-            quantity: Number(item.quantity || 1),
-            c_qty: Number(item.quantity || 1),
+            price: Number(item.price) * Number(item.quantity || 1),
+            quantity: Number(item.quantity),
             vatType: 1,
             url: rawImg
         };
