@@ -54,9 +54,28 @@
             </a>
         </div>
 
-        <!-- SEARCH BAR -->
-        <div class="search-box">
-            <input type="text" id="Search" placeholder="חפש מוצרים...">
+        <!-- SEARCH BAR WITH QUICK TAGS -->
+        <div class="search-box-wrapper">
+            <div class="search-box">
+                <input type="text" id="Search" placeholder="חפש מוצרים...">
+            </div>
+
+            <!-- QUICK CATEGORY TAGS -->
+            <div class="search-tags">
+                <button class="search-tag" onclick="quickSearch('שמפו')">שמפו</button>
+                <button class="search-tag" onclick="quickSearch('מסכה')">מסכות</button>
+                <button class="search-tag" onclick="quickSearch('סרום')">סרומים</button>
+                <button class="search-tag" onclick="quickSearch('מרכך')">מרככים</button>
+                <button class="search-tag" onclick="quickSearch('לחות')">קרמי לחות</button>
+                <button class="search-tag" onclick="quickSearch('תלתלים')">תלתלים</button>
+                <button class="search-tag" onclick="quickSearch('ארגן')">סדרת ארגן</button>
+                <button class="search-tag" onclick="quickSearch('דבש וקוקוס')">סדרת Coco&Honey</button>
+                <button class="search-tag" onclick="quickSearch('מתולתלות')">הסדרה למתולתלות</button>
+                <button class="search-tag" onclick="quickSearch('המפה')">סדרת המפה</button>
+                <button class="search-tag" onclick="quickSearch('פורטה')">קרטין פורטה</button>
+                <button class="search-tag" onclick="quickSearch('my collection')">my collection</button>
+                <button class="search-tag" onclick="quickSearch('זרעי פשתן')">סדרת זרעי פשתן</button>
+            </div>
         </div>
 
         <div class="logo">JOYA COSMETICS</div>

@@ -39,9 +39,28 @@
       </a>
     </div>
 
-    <!-- SEARCH BAR -->
-    <div class="search-box">
-      <input type="text" id="Search" placeholder="חפש מוצרים...">
+    <!-- SEARCH BAR WITH QUICK TAGS -->
+    <div class="search-box-wrapper">
+      <div class="search-box">
+        <input type="text" id="Search" placeholder="חפש מוצרים...">
+      </div>
+
+      <!-- QUICK CATEGORY TAGS -->
+      <div class="search-tags">
+        <button class="search-tag" onclick="quickSearch('שמפו')">שמפו</button>
+        <button class="search-tag" onclick="quickSearch('מסכה')">מסכות</button>
+        <button class="search-tag" onclick="quickSearch('סרום')">סרומים</button>
+        <button class="search-tag" onclick="quickSearch('מרכך')">מרככים</button>
+        <button class="search-tag" onclick="quickSearch('לחות')">קרמי לחות</button>
+        <button class="search-tag" onclick="quickSearch('תלתלים')">תלתלים</button>
+        <button class="search-tag" onclick="quickSearch('ארגן')">סדרת ארגן</button>
+        <button class="search-tag" onclick="quickSearch('דבש וקוקוס')">סדרת Coco&Honey</button>
+        <button class="search-tag" onclick="quickSearch('מתולתלות')">הסדרה למתולתלות</button>
+        <button class="search-tag" onclick="quickSearch('המפה')">סדרת המפה</button>
+        <button class="search-tag" onclick="quickSearch('פורטה')">קרטין פורטה</button>
+        <button class="search-tag" onclick="quickSearch('my collection')">my collection</button>
+        <button class="search-tag" onclick="quickSearch('זרעי פשתן')">סדרת זרעי פשתן</button>
+      </div>
     </div>
 
     <div class="logo">JOYA COSMETICS</div>
@@ -64,7 +83,7 @@
       <p><span>סה"כ לתשלום:</span> <strong id="modalTotal">₪0.00</strong></p>
     </div>
 
-    <form id="paymentForm">
+    <form id="checkoutForm" onsubmit="handleCheckout(event)">
       <label for="firstName">שם פרטי:</label>
       <input type="text" id="firstName" required placeholder="ישראל">
 
@@ -263,133 +282,6 @@
 
     if (totalElement) {
       totalElement.textContent = `₪${grandTotal.toFixed(2)}`;
-    }
-  }
-
-  // Handle Form Submission
-  document.getElementById('paymentForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const payBtn = document.getElementById('payBtn');
-    payBtn.disabled = true;
-    payBtn.textContent = 'מעבר לתשלום...';
-
-    const totalText = document.getElementById('modalTotal').textContent.replace('₪', '').trim();
-    const totalAmount = parseFloat(totalText) || 0;
-
-    if (totalAmount <= 0) {
-      alert('העגלה ריקה או שסכום ההזמנה אינו תקין');
-      payBtn.disabled = false;
-      payBtn.textContent = 'מעבר לתשלום מאובטח';
-      return;
-    }
-
-    const rawCart = localStorage.getItem('cart') || localStorage.getItem('joya_cart') || localStorage.getItem('cartItems') || '[]';
-
-    const checkoutData = {
-      customerName: document.getElementById('custName').value,
-      customerEmail: document.getElementById('custEmail').value,
-      customerPhone: document.getElementById('custPhone').value,
-      customerAddress: document.getElementById('custAddress').value,
-      amount: totalAmount,
-      items: JSON.parse(rawCart)
-    };
-
-    try {
-      const response = await fetch('/api/create-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(checkoutData)
-      });
-
-      const data = await response.json();
-
-      if (data.paymentUrl) {
-        window.location.href = data.paymentUrl;
-      } else {
-        alert('אירעה שגיאה ביצירת התשלום. אנא נסה שנית.');
-        payBtn.disabled = false;
-        payBtn.textContent = 'מעבר לתשלום מאובטח';
-      }
-    } catch (err) {
-      console.error('Payment error:', err);
-      alert('אירעה שגיאה בהתחברות לשרת.');
-      payBtn.disabled = false;
-      payBtn.textContent = 'מעבר לתשלום מאובטח';
-    }
-  });
-
-  // checkout.js
-
-  document.addEventListener('DOMContentLoaded', () => {
-    const checkoutForm = document.getElementById('checkoutForm'); // Or your pay button ID
-
-    if (checkoutForm) {
-      checkoutForm.addEventListener('submit', handleCheckoutSubmit);
-    }
-  });
-
-  async function handleCheckoutSubmit(event) {
-    event.preventDefault(); // Stop form from doing a standard page reload
-
-    const payButton = document.getElementById('payButton');
-    if (payButton) {
-      payButton.disabled = true;
-      payButton.innerText = "...מעבר לתשלום";
-    }
-
-    try {
-      // 1. Calculate order total from your local cart helper
-      const cart = JSON.parse(localStorage.getItem('shopping_cart')) || [];
-
-      if (cart.length === 0) {
-        alert('הסל שלך ריק');
-        if (payButton) {
-          payButton.disabled = false;
-          payButton.innerText = "לתשלום";
-        }
-        return;
-      }
-
-      const totalAmount = cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
-
-      // 2. Gather customer details from input fields
-      const customerData = {
-        amount: totalAmount,
-        clientName: document.getElementById('fullName')?.value || 'לקוח',
-        clientPhone: document.getElementById('phone')?.value || '',
-        clientEmail: document.getElementById('email')?.value || ''
-      };
-
-      // 3. Call your Node.js backend payment API
-      const response = await fetch('/api/create-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(customerData)
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.url) {
-        // 4. Redirect customer directly to Meshulam's secure checkout URL
-        window.location.href = data.url;
-      } else {
-        alert('שגיאה ביצירת תהליך התשלום: ' + (data.error || 'נסה שוב מאוחר יותר'));
-        if (payButton) {
-          payButton.disabled = false;
-          payButton.innerText = "לתשלום";
-        }
-      }
-
-    } catch (err) {
-      console.error("Payment error:", err);
-      alert('אירעה שגיאה בתקשורת עם השרת');
-      if (payButton) {
-        payButton.disabled = false;
-        payButton.innerText = "לתשלום";
-      }
     }
   }
 </script>

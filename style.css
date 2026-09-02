@@ -1599,14 +1599,14 @@ body.acc-colored-text td {
     font-size: 1.2rem;
 }
 
-#paymentForm label {
+#checkoutForm label {
     display: block;
     font-weight: 600;
     margin-bottom: 6px;
     color: #333333;
 }
 
-#paymentForm input {
+#checkoutForm input {
     width: 100%;
     padding: 11px 13px;
     margin-bottom: 18px;
@@ -1617,7 +1617,7 @@ body.acc-colored-text td {
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-#paymentForm input:focus {
+#checkoutForm input:focus {
     outline: none;
     border-color: #d88195;
     box-shadow: 0 0 0 3px rgba(216, 129, 149, 0.2);
@@ -1636,14 +1636,26 @@ body.acc-colored-text td {
     transition: background-color 0.2s ease;
 }
 
-.primary-btn:hover {
-    background-color: #c46b80;
+#SuccesfulPurchaseBtn{
+    width: 100%;
+    background-color: #d88195;
+    color: #ffffff;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
 .primary-btn:hover {
     background-color: #c46b80;
 }
 
+#SuccesfulPurchaseBtn:hover{
+    background-color: #c46b80;
+}
 
 .Icon:hover{
     cursor: pointer;
@@ -1821,4 +1833,162 @@ body.acc-colored-text td {
     .product-card {
         max-width: 90%; /* Allow card to fill screen */
     }
+}
+
+/* ==========================================
+   MOBILE RESPONSIVENESS & SEARCH TAG FIXES
+   ========================================== */
+
+/* 1. Prevent screen overflow and add safe side padding */
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 16px; /* Adds side margins on mobile */
+    box-sizing: border-box;
+}
+
+/* 2. Responsive Google Maps Iframe Fix */
+main iframe {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 350px !important;
+    margin: 20px 0 !important;
+    border-radius: var(--radius-sm);
+}
+
+/* 3. Responsive Search Box & Dropdown Tag Wrappers */
+.search-box-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    max-width: 320px;
+}
+
+.search-box {
+    width: 100%;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 8px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    outline: none;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+}
+
+/* Multi-row Category Tags Overlay */
+.search-tags {
+    display: none; /* Hidden by default */
+    flex-wrap: wrap; /* Allows tags to break onto multiple lines */
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    padding: 10px;
+    margin-top: 6px;
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 250;
+    box-sizing: border-box;
+}
+
+/* Show multi-row tags when search bar or tag area is focused */
+.search-box-wrapper:focus-within .search-tags {
+    display: flex;
+}
+
+.search-tag {
+    background-color: #f4efeb;
+    border: 1px solid #dcd3cb;
+    color: var(--dark-brown);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.search-tag:hover {
+    background-color: var(--primary-brown);
+    color: #ffffff;
+    border-color: var(--primary-brown);
+}
+
+/* 4. Header Alignment on Mobile Devices */
+@media (max-width: 768px) {
+    .header-content {
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .logo {
+        font-size: 1.4rem;
+        order: 1;
+    }
+
+    .header-icons {
+        order: 2;
+    }
+
+    .search-box-wrapper {
+        order: 3; /* Moves search bar underneath logo & icons on phones */
+        max-width: 100%;
+    }
+}
+
+/* Quick Search Category Tags Bar */
+.search-box-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 400px;
+    position: relative;
+}
+
+.search-tags {
+    display: none; /* Hidden by default until focused */
+    flex-wrap: wrap; /* Allows buttons to wrap into multiple rows */
+    justify-content: center; /* Centers the tag rows nicely */
+    gap: 6px;
+    margin-top: 8px;
+    width: 100%;
+    padding: 4px 0;
+}
+
+.search-tags::-webkit-scrollbar {
+    display: none;
+}
+
+/* Reveal tags when search box or tags are focused */
+.search-box-wrapper:focus-within .search-tags {
+    display: flex;
+}
+
+.search-tag {
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    color: #333;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.search-tag:hover {
+    background-color: #333;
+    color: #fff;
+    border-color: #333;
 }

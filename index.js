@@ -310,6 +310,92 @@ function renderWishlistPage() {
 }
 
 /* ==========================================
+   SMART SEARCH DICTIONARY & FUZZY LOGIC
+   ========================================== */
+
+// Bi-directional Hebrew <-> English & Synonym Dictionary
+const SEARCH_DICTIONARY = {
+    // Categories & Product Types
+    "מסכה": ["מסכה", "מסכות", "מסיכה", "מסכת", "הזנה", "mask", "masks", "hair mask"],
+    "מסכת": ["מסכה", "מסכות", "מסיכה", "מסכת", "הזנה", "mask", "masks", "hair mask"],
+    "mask": ["מסכה", "מסכות", "מסיכה", "מסכת", "הזנה", "mask", "masks", "hair mask"],
+
+    "שמפו": ["שמפו", "חפיפה", "shampoo"],
+    "shampoo": ["שמפו", "חפיפה", "shampoo"],
+
+    "מרכך": ["מרכך", "מרככים", "קונדישנר", "conditioner", "conditioners"],
+    "conditioner": ["מרכך", "מרככים", "קונדישנר", "conditioner", "conditioners"],
+
+    "סרום": ["סרום", "סרומים", "serum", "serums"],
+    "serum": ["סרום", "סרומים", "serum", "serums"],
+
+    "לחות": ["לחות", "קרם", "קרמים", "moisturizer", "moisturizing", "cream"],
+    "cream": ["לחות", "קרם", "קרמים", "moisturizer", "moisturizing", "cream"],
+    "moisturizer": ["לחות", "קרם", "קרמים", "moisturizer", "moisturizing", "cream"],
+
+    "שיער": ["שיער", "שער", "hair"],
+    "hair": ["שיער", "שער", "hair"],
+
+    // Ingredients & Collections
+    "ארגן": ["ארגן", "argan"],
+    "argan": ["ארגן", "argan"],
+
+    "קוקוס": ["קוקוס", "coco", "coconut"],
+    "coco": ["קוקוס", "coco", "coconut"],
+    "coconut": ["קוקוס", "coco", "coconut"],
+
+    "דבש": ["דבש", "honey"],
+    "honey": ["דבש", "honey"],
+
+    "מתולתלות": ["מתולתלות", "תלתלים", "מתולתלת", "curls", "curly"],
+    "תלתלים": ["מתולתלות", "תלתלים", "מתולתלת", "curls", "curly"],
+    "curls": ["מתולתלות", "תלתלים", "מתולתלת", "curls", "curly"],
+    "curly": ["מתולתלות", "תלתלים", "מתולתלת", "curls", "curly"],
+
+    "המפה": ["המפה", "hemp", "hempha"],
+    "hemp": ["המפה", "hemp", "hempha"],
+
+    "קרטין": ["קרטין", "keratin"],
+    "keratin": ["קרטין", "keratin"],
+
+    "פשתן": ["פשתן", "flax", "flaxseed", "pishtan"],
+    "flax": ["פשתן", "flax", "flaxseed", "pishtan"],
+
+    "סדרה": ["סדרה", "סדרת", "collection", "series"],
+    "collection": ["סדרה", "סדרת", "collection", "series"]
+};
+
+// Expand a word into all its translated variants and synonyms
+function getExpandedTokenVariants(token) {
+    const clean = token.toLowerCase().trim();
+    if (!clean) return [];
+
+    let variants = new Set([clean]);
+
+    for (const [key, list] of Object.entries(SEARCH_DICTIONARY)) {
+        if (clean === key || clean.includes(key) || key.includes(clean)) {
+            list.forEach(v => variants.add(v.toLowerCase()));
+        }
+    }
+
+    return Array.from(variants);
+}
+
+// Check if a product's text matches the user's search query flexibly
+function isSmartSearchMatch(productText, searchQuery) {
+    const cleanProductText = productText.toLowerCase();
+    const queryTokens = searchQuery.toLowerCase().trim().split(/\s+/).filter(t => t.length > 0);
+
+    if (queryTokens.length === 0) return true;
+
+    // Every word typed by the user must have at least one synonym/translation match in the product text
+    return queryTokens.every(token => {
+        const variants = getExpandedTokenVariants(token);
+        return variants.some(variant => cleanProductText.includes(variant));
+    });
+}
+
+/* ==========================================
    4. DOM CONTENT LOADED & EVENT LISTENERS
    ========================================== */
 document.addEventListener('DOMContentLoaded', () => {
@@ -317,24 +403,61 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log("DOM loaded! Starting Contentful fetch...");
     fetchProducts();
 
-    // Live Search Filter
+    // Elements to hide during active search
+    const categoriesSection = document.querySelector('.categories-section');
+    const heroCarousel = document.querySelector('.hero-carousel-wrapper');
+    const dualBanners = document.getElementById('dualBannersCarousel');
+
+    // Smart Live Search Filter
     const searchInput = document.getElementById("Search");
     if (searchInput) {
-        searchInput.addEventListener('keyup', function() {
-            let filter = this.value.toUpperCase();
-            let listItems = document.querySelectorAll('#ItemsList li');
+        searchInput.addEventListener('input', function() {
+            let query = this.value.trim();
 
+            // Select products from both #ItemsList and #productGrid / .product-grid
+            let listItems = document.querySelectorAll('#ItemsList li, #productGrid li, .product-grid li, .product-grid > *');
+
+            // Hide/Show Banners and Categories if they exist on the current page
+            if (query.length > 0) {
+                if (categoriesSection) categoriesSection.style.display = 'none';
+                if (heroCarousel) heroCarousel.style.display = 'none';
+                if (dualBanners) dualBanners.style.display = 'none';
+            } else {
+                if (categoriesSection) categoriesSection.style.display = '';
+                if (heroCarousel) heroCarousel.style.display = '';
+                if (dualBanners) dualBanners.style.display = '';
+            }
+
+            // Filter Product Items
             listItems.forEach((item) => {
-                let text = item.textContent;
-                if(text.toUpperCase().indexOf(filter) > -1) {
-                    item.classList.remove('hidden');
+                let itemText = item.textContent || item.innerText;
+                if (isSmartSearchMatch(itemText, query)) {
+                    item.style.display = '';
                 } else {
-                    item.classList.add('hidden');
+                    item.style.display = 'none';
                 }
             });
         });
     }
 });
+
+/* ==========================================
+   QUICK CATEGORY SEARCH TRIGGER
+   ========================================== */
+function quickSearch(term) {
+    const searchInput = document.getElementById("Search");
+    if (!searchInput) return;
+
+    // Toggle back off if user clicks the exact same tag twice
+    if (searchInput.value === term) {
+        searchInput.value = '';
+    } else {
+        searchInput.value = term;
+    }
+
+    // Fire the 'input' event to execute smart search and hide banners
+    searchInput.dispatchEvent(new Event('input'));
+}
 
 setInterval(fetchProducts, 1200000);
 
@@ -520,9 +643,9 @@ function renderCart() {
 
     if (OverAll) {
         if (totalCartSum < 200 && totalCartSum > 0) {
-            OverAll.innerHTML = `סך הכל: ₪${totalCartSum} <p class="shipping-notice">בקניה מעל ₪200 משלוח חינם</p>`;
+            OverAll.innerHTML = `סך הכל: ₪${totalCartSum} <!--<p class="shipping-notice">בקניה מעל ₪200 משלוח חינם</p>-->`;
         } else if (totalCartSum >= 200) {
-            OverAll.innerHTML = `סך הכל: ₪${totalCartSum} <p class="shipping-notice">* משלוח חינם</p>`;
+            OverAll.innerHTML = `סך הכל: ₪${totalCartSum} <!--<p class="shipping-notice">* משלוח חינם</p>-->`;
         } else {
             OverAll.innerHTML = `סך הכל: ₪0`;
         }
@@ -1064,26 +1187,94 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-async function processPayment(orderData) {
+async function handleCheckout(event) {
+    if (event) event.preventDefault();
+
+    const firstName = document.getElementById('firstName')?.value.trim() || '';
+    const lastName  = document.getElementById('lastName')?.value.trim() || '';
+    const email     = document.getElementById('custEmail')?.value.trim() || '';
+    const address   = document.getElementById('custAddress')?.value.trim() || '';
+    const Phone   = document.getElementById('custPhone').value.trim();
+
+    const cart = getCart();
+
+    if (!cart || cart.length === 0) {
+        alert('הסל שלך ריק!');
+        return;
+    }
+
+    const total = cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity || 1)), 0);
+
+    const itemList = cart.map(item => {
+        let rawImg = item.src || item.image || item.img || '';
+
+        // Ensure full HTTPS URL for Contentful assets
+        if (rawImg.startsWith('//')) {
+            rawImg = 'https:' + rawImg;
+        }
+
+        return {
+            name: item.name || item.title,
+            price: Number(item.price),
+            quantity: Number(item.quantity || 1),
+            vatType: 1,
+            url: rawImg
+        };
+    });
+
+    await generateDynamicCheckout(firstName, lastName, total, itemList, email, address, Phone);
+}
+
+// 2. Main checkout function targeting Make webhook
+async function generateDynamicCheckout(FirstName, LastName, total, itemList, email, Adress, Phone) {
     try {
-        const response = await fetch('YOUR_MAKE_WEBHOOK_URL', {
+        const response = await fetch('https://hook.eu1.make.com/4v3u6jcd1mik088lvu80v06e3ou5g8qc', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                amount: orderData.price,
-                itemName: orderData.name,
-                orderId: orderData.id,
-                customerEmail: orderData.email || ''
+                name: `${FirstName} ${LastName}`,
+                amount: total,
+                items: itemList,
+                userEmail: email,
+                address: Adress,
+                phone: Phone,
             })
         });
 
-        const data = await response.json();
-        if (data.paymentUrl) {
-            window.location.href = data.paymentUrl;
+        const result = await response.json();
+        if (result.paymentUrl) {
+            window.location.href = result.paymentUrl;
         } else {
-            alert('Unable to generate payment link. Please try again.');
+            alert('אירעה שגיאה ביצירת קישור לתשלום');
         }
-    } catch (error) {
-        console.error('Payment Error:', error);
+    } catch (err) {
+        console.error('Checkout error:', err);
     }
+}
+
+
+
+function clearCart() {
+    // 1. Clear cart in localStorage
+    localStorage.setItem('cart', JSON.stringify([]));
+
+    let currentCart = getCart();
+    currentCart.filter(item => {})
+
+    // 2. Clear the <ul> contents in the HTML
+    const cartList = document.getElementById('CartItems');
+    if (cartList) {
+        cartList.replaceChildren();
+    }
+
+    // 3. Reset total price display if present
+    const totalElement = document.getElementById('Cost');
+    if (totalElement) {
+        totalElement.textContent = 'סך הכל: ₪0';
+    }
+
+    const opQuantity = document.getElementById('OpQuantity');
+    opQuantity.textContent = '0';
+
+    saveCart([]);
 }
