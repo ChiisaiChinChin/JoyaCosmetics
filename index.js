@@ -1239,9 +1239,9 @@ async function handleCheckout(event) {
         }
 
         return {
-            name: item.name + " x " + item.quantity || item.title+ " x " + item.quantity,
+            name: item.name + " × " + item.quantity || item.title+ " × " + item.quantity,
             price: Number(item.price) * Number(item.quantity || 1),
-            quantity: Number(item.quantity),
+            quantity: 1,
             vatType: 1,
             url: rawImg
         };
