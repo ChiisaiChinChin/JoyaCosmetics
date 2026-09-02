@@ -1239,7 +1239,7 @@ async function handleCheckout(event) {
         }
 
         return {
-            name: item.name + " * " + item.quantity || item.title+ " * " + item.quantity,
+            name: item.name + item.quantity + "x " || item.title + item.quantity + "x ",
             price: Number(item.price) * Number(item.quantity || 1),
             quantity: 1,
             vatType: 1,
