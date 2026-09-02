@@ -1723,13 +1723,25 @@ body.acc-colored-text td {
     background-color: #16a34a;
 }
 
+/* ==========================================
+   WISHLIST GRID LAYOUT (2 or 3 COLUMNS)
+   ========================================== */
 #WishListItems {
-    list-style: none;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(3, 1fr); /* 3 columns on desktop */
     gap: 20px;
+    list-style: none;
     padding: 0;
-    margin: 5% 0;
+    margin: 30px 0;
+    width: 100%;
+}
+
+/* Tablet & Mobile (2 columns) */
+@media (max-width: 768px) {
+    #WishListItems {
+        grid-template-columns: repeat(2, 1fr); /* 2 columns on smaller screens */
+        gap: 12px;
+    }
 }
 
 /* ==========================================
