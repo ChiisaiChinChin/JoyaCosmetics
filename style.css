@@ -1188,6 +1188,22 @@ DUAL BANNERS CAROUSEL STYLES
 .right-arrow { right: -35px; }
 .left-arrow { left: -35px; }
 
+/* Enable horizontal touch swipes on banner containers */
+.hero-banner,
+.hero-slider,
+.dual-banner,
+.banner-container,
+.slider-wrapper {
+    touch-action: pan-y pinch-zoom; /* Allows vertical scroll while capturing horizontal swipes */
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.hero-banner img,
+.dual-banner img {
+    pointer-events: none; /* Prevents mobile browser image drag default behavior */
+}
+
 /* Pink Dots Below Card */
 .carousel-dots-container {
     display: flex;

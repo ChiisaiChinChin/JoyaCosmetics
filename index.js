@@ -1304,74 +1304,78 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ==========================================
-   9. MOBILE TOUCH SWIPE FOR BANNERS
+   MOBILE TOUCH SWIPE HANDLER
    ========================================== */
-function enableBannerSwipe(containerSelector, nextCallback, prevCallback) {
-    const containers = document.querySelectorAll(containerSelector);
+function initBannerSwipes() {
+    // Select all potential banner or slider containers
+    const bannerContainers = document.querySelectorAll('.hero-banner, .hero-slider, .dual-banner, .banner-wrapper');
 
-    containers.forEach(container => {
-        let startX = 0;
-        let startY = 0;
-        let endX = 0;
-        let endY = 0;
+    bannerContainers.forEach(container => {
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
 
-        const swipeThreshold = 40; // Minimum distance in pixels to trigger swipe
+        const minSwipeDistance = 30; // Minimum drag in px to qualify as a swipe
 
         container.addEventListener('touchstart', (e) => {
-            startX = e.changedTouches[0].clientX;
-            startY = e.changedTouches[0].clientY;
+            touchStartX = e.changedTouches[0].clientX;
+            touchStartY = e.changedTouches[0].clientY;
         }, { passive: true });
 
         container.addEventListener('touchend', (e) => {
-            endX = e.changedTouches[0].clientX;
-            endY = e.changedTouches[0].clientY;
-            handleGesture();
+            touchEndX = e.changedTouches[0].clientX;
+            touchEndY = e.changedTouches[0].clientY;
+
+            handleSwipeGesture(container);
         }, { passive: true });
 
-        function handleGesture() {
-            const diffX = endX - startX;
-            const diffY = endY - startY;
+        function handleSwipeGesture(targetContainer) {
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = touchEndY - touchStartY;
 
-            // Check if horizontal movement is dominant over vertical scrolling
-            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) >= swipeThreshold) {
-                // RTL context:
-                // Dragging finger Left (diffX < 0) -> Move to Next banner
-                // Dragging finger Right (diffX > 0) -> Move to Previous banner
-                if (diffX < 0) {
-                    if (typeof nextCallback === 'function') nextCallback(container);
+            // Ensure horizontal swipe distance is greater than vertical scroll distance
+            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) >= minSwipeDistance) {
+
+                // In RTL layout (Hebrew):
+                // Swiping LEFT (deltaX < 0) -> Next Slide
+                // Swiping RIGHT (deltaX > 0) -> Previous Slide
+                if (deltaX < 0) {
+                    navigateBanner(targetContainer, 'next');
                 } else {
-                    if (typeof prevCallback === 'function') prevCallback(container);
+                    navigateBanner(targetContainer, 'prev');
                 }
             }
         }
     });
 }
 
-// Initialize on DOM ready
-document.addEventListener('DOMContentLoaded', () => {
-    // Example setup for Hero Banner
-    enableBannerSwipe('.hero-banner, .hero-slider',
-        (container) => {
-            // Trigger Next Slide (e.g., click your existing 'next' button or call your slide function)
-            const nextBtn = container.querySelector('.next-btn, .swiper-button-next');
-            if (nextBtn) nextBtn.click();
-        },
-        (container) => {
-            // Trigger Prev Slide
-            const prevBtn = container.querySelector('.prev-btn, .swiper-button-prev');
-            if (prevBtn) prevBtn.click();
-        }
-    );
+function navigateBanner(container, direction) {
+    // 1. Try finding existing navigation buttons
+    const nextBtn = container.querySelector('.next, .next-btn, .swiper-button-next, [onclick*="next"]');
+    const prevBtn = container.querySelector('.prev, .prev-btn, .swiper-button-prev, [onclick*="prev"]');
 
-    // Example setup for Dual Banners
-    enableBannerSwipe('.dual-banner, .banner-grid',
-        (container) => {
-            const nextBtn = container.querySelector('.next-btn');
-            if (nextBtn) nextBtn.click();
-        },
-        (container) => {
-            const prevBtn = container.querySelector('.prev-btn');
-            if (prevBtn) prevBtn.click();
-        }
-    );
-});
+    if (direction === 'next' && nextBtn) {
+        nextBtn.click();
+        return;
+    }
+    if (direction === 'prev' && prevBtn) {
+        prevBtn.click();
+        return;
+    }
+
+    // 2. Fallback: Directly scroll or transform child slides if no buttons exist
+    const scrollAmount = container.clientWidth;
+    if (direction === 'next') {
+        container.scrollBy({ left: -scrollAmount, behavior: 'smooth' }); // RTL direction adjustment
+    } else {
+        container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+}
+
+// Auto-initialize when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initBannerSwipes);
+} else {
+    initBannerSwipes();
+}
