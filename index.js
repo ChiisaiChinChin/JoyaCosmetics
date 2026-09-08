@@ -1304,83 +1304,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ==========================================
-   MOBILE TOUCH SWIPE HANDLER
-   ========================================== */
-function initBannerSwipes() {
-    // Select all potential banner or slider containers
-    const bannerContainers = document.querySelectorAll('.hero-banner, .hero-slider, .dual-banner, .banner-wrapper');
-
-    bannerContainers.forEach(container => {
-        let touchStartX = 0;
-        let touchStartY = 0;
-        let touchEndX = 0;
-        let touchEndY = 0;
-
-        const minSwipeDistance = 30; // Minimum drag in px to qualify as a swipe
-
-        container.addEventListener('touchstart', (e) => {
-            touchStartX = e.changedTouches[0].clientX;
-            touchStartY = e.changedTouches[0].clientY;
-        }, { passive: true });
-
-        container.addEventListener('touchend', (e) => {
-            touchEndX = e.changedTouches[0].clientX;
-            touchEndY = e.changedTouches[0].clientY;
-
-            handleSwipeGesture(container);
-        }, { passive: true });
-
-        function handleSwipeGesture(targetContainer) {
-            const deltaX = touchEndX - touchStartX;
-            const deltaY = touchEndY - touchStartY;
-
-            // Ensure horizontal swipe distance is greater than vertical scroll distance
-            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) >= minSwipeDistance) {
-
-                // In RTL layout (Hebrew):
-                // Swiping LEFT (deltaX < 0) -> Next Slide
-                // Swiping RIGHT (deltaX > 0) -> Previous Slide
-                if (deltaX < 0) {
-                    navigateBanner(targetContainer, 'next');
-                } else {
-                    navigateBanner(targetContainer, 'prev');
-                }
-            }
-        }
-    });
-}
-
-function navigateBanner(container, direction) {
-    // 1. Try finding existing navigation buttons
-    const nextBtn = container.querySelector('.next, .next-btn, .swiper-button-next, [onclick*="next"]');
-    const prevBtn = container.querySelector('.prev, .prev-btn, .swiper-button-prev, [onclick*="prev"]');
-
-    if (direction === 'next' && nextBtn) {
-        nextBtn.click();
-        return;
-    }
-    if (direction === 'prev' && prevBtn) {
-        prevBtn.click();
-        return;
-    }
-
-    // 2. Fallback: Directly scroll or transform child slides if no buttons exist
-    const scrollAmount = container.clientWidth;
-    if (direction === 'next') {
-        container.scrollBy({ left: -scrollAmount, behavior: 'smooth' }); // RTL direction adjustment
-    } else {
-        container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-    }
-}
-
-// Auto-initialize when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initBannerSwipes);
-} else {
-    initBannerSwipes();
-}
-
-/* ==========================================
    MOBILE TOUCH SWIPE INITIALIZATION
    ========================================== */
 function initMobileBannerSwipes() {
@@ -1390,11 +1313,11 @@ function initMobileBannerSwipes() {
         attachSwipeHandler(heroContainer, {
             onSwipeLeft: () => {
                 // Next slide in RTL flow
-                if (typeof moveBanner === 'function') moveBanner(1);
+                if (typeof moveBanner === 'function') moveBanner(-1);
             },
             onSwipeRight: () => {
                 // Previous slide in RTL flow
-                if (typeof moveBanner === 'function') moveBanner(-1);
+                if (typeof moveBanner === 'function') moveBanner(1);
             }
         });
     }
@@ -1405,11 +1328,11 @@ function initMobileBannerSwipes() {
         attachSwipeHandler(dualContainer, {
             onSwipeLeft: () => {
                 // Next slide in RTL flow
-                if (typeof moveSlide === 'function') moveSlide('dualBannersCarousel', 1);
+                if (typeof moveSlide === 'function') moveSlide('dualBannersCarousel', -1);
             },
             onSwipeRight: () => {
                 // Previous slide in RTL flow
-                if (typeof moveSlide === 'function') moveSlide('dualBannersCarousel', -1);
+                if (typeof moveSlide === 'function') moveSlide('dualBannersCarousel', 1);
             }
         });
     }
