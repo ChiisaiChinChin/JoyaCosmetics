@@ -1204,6 +1204,23 @@ DUAL BANNERS CAROUSEL STYLES
     pointer-events: none; /* Prevents mobile browser image drag default behavior */
 }
 
+/* Enable Touch Swiping on Banner Containers */
+.carousel-container,
+#dualBannersCarousel,
+.carousel-track-container,
+.hero-banner-card {
+    touch-action: pan-y !important; /* Critical: allows vertical page scroll while capturing horizontal swipes */
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Prevent image ghosting/dragging on mobile touch */
+.carousel-container img,
+#dualBannersCarousel img {
+    pointer-events: none;
+    -webkit-user-drag: none;
+}
+
 /* Pink Dots Below Card */
 .carousel-dots-container {
     display: flex;

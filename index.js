@@ -1379,3 +1379,77 @@ if (document.readyState === 'loading') {
 } else {
     initBannerSwipes();
 }
+
+/* ==========================================
+   MOBILE TOUCH SWIPE INITIALIZATION
+   ========================================== */
+function initMobileBannerSwipes() {
+    // 1. Hero Banner Carousel Swipe Handler
+    const heroContainer = document.querySelector('.carousel-container') || document.getElementById('bannerContainer');
+    if (heroContainer) {
+        attachSwipeHandler(heroContainer, {
+            onSwipeLeft: () => {
+                // Next slide in RTL flow
+                if (typeof moveBanner === 'function') moveBanner(1);
+            },
+            onSwipeRight: () => {
+                // Previous slide in RTL flow
+                if (typeof moveBanner === 'function') moveBanner(-1);
+            }
+        });
+    }
+
+    // 2. Dual Banners Carousel Swipe Handler
+    const dualContainer = document.getElementById('dualBannersCarousel');
+    if (dualContainer) {
+        attachSwipeHandler(dualContainer, {
+            onSwipeLeft: () => {
+                // Next slide in RTL flow
+                if (typeof moveSlide === 'function') moveSlide('dualBannersCarousel', 1);
+            },
+            onSwipeRight: () => {
+                // Previous slide in RTL flow
+                if (typeof moveSlide === 'function') moveSlide('dualBannersCarousel', -1);
+            }
+        });
+    }
+}
+
+function attachSwipeHandler(element, callbacks) {
+    let startX = 0;
+    let startY = 0;
+    let endX = 0;
+    let endY = 0;
+    const minSwipeDistance = 30; // Minimum drag in px to trigger swipe
+
+    element.addEventListener('touchstart', (e) => {
+        startX = e.changedTouches[0].clientX;
+        startY = e.changedTouches[0].clientY;
+    }, { passive: true });
+
+    element.addEventListener('touchend', (e) => {
+        endX = e.changedTouches[0].clientX;
+        endY = e.changedTouches[0].clientY;
+
+        const diffX = endX - startX;
+        const diffY = endY - startY;
+
+        // Ensure horizontal movement exceeds vertical movement
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) >= minSwipeDistance) {
+            if (diffX < 0) {
+                // Swiped Left
+                if (typeof callbacks.onSwipeLeft === 'function') callbacks.onSwipeLeft();
+            } else {
+                // Swiped Right
+                if (typeof callbacks.onSwipeRight === 'function') callbacks.onSwipeRight();
+            }
+        }
+    }, { passive: true });
+}
+
+// Bind event on DOM load
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMobileBannerSwipes);
+} else {
+    initMobileBannerSwipes();
+}
