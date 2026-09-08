@@ -1361,10 +1361,12 @@ function attachSwipeHandler(element, callbacks) {
         if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) >= minSwipeDistance) {
             if (diffX < 0) {
                 // Swiped Left
-                if (typeof callbacks.onSwipeLeft === 'function') callbacks.onSwipeLeft();
+                //for some reason its in reverse? so I flipped it here when I swipe left and onswipe is Left it swipes right
+                if (typeof callbacks.onSwipeLeft === 'function') callbacks.onSwipeRight();
             } else {
                 // Swiped Right
-                if (typeof callbacks.onSwipeRight === 'function') callbacks.onSwipeRight();
+                //for some reason its in reverse? so I flipped it here when I swipe Right and onswipe is Right it swipes left
+                if (typeof callbacks.onSwipeRight === 'function') callbacks.onSwipeLeft();
             }
         }
     }, { passive: true });
