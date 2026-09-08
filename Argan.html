@@ -192,6 +192,75 @@
         <p>© כל הזכויות שמורות ל-JOYA COSMETICS</p>
     </div>
 </footer>
+
+<!-- Accessibility Floating Button & Menu -->
+<div id="accWidget" class="acc-widget">
+    <button id="accToggleBtn" class="acc-toggle-btn" aria-label="פתח תפריט נגישות" title="תפריט נגישות">
+        <img src="Pictures/Disability-Wheelchair--Streamline-Ultimate.png" alt="נגישות" class="acc-icon">
+    </button>
+
+    <div id="accMenu" class="acc-menu hidden" aria-hidden="true">
+        <div class="acc-header">
+            <h3>תפריט נגישות</h3>
+            <button id="accCloseBtn" class="acc-close-btn" aria-label="סגור תפריט">&times;</button>
+        </div>
+
+        <div class="acc-body">
+            <!-- Screen Reader / Text-to-Speech -->
+            <button class="acc-btn" id="accReadTextBtn">🔊 הקראת טקסט (מסומן)</button>
+
+            <!-- Audio Mute -->
+            <button class="acc-btn" id="accMuteSoundsBtn">🔇 השתקת צלילים</button>
+
+            <hr />
+
+            <!-- Text Alignment -->
+            <div class="acc-group">
+                <label>יישור טקסט:</label>
+                <div class="acc-grid-3">
+                    <button class="acc-btn-sub" id="accAlignRight">ימין</button>
+                    <button class="acc-btn-sub" id="accAlignCenter">מרכז</button>
+                    <button class="acc-btn-sub" id="accAlignLeft">שמאל</button>
+                </div>
+            </div>
+
+            <!-- Letter Spacing -->
+            <div class="acc-group">
+                <label>רווח בין אותיות:</label>
+                <button class="acc-btn" id="accLetterSpacingBtn">א - א - א (רווח אותיות)</button>
+            </div>
+
+            <!-- Line Height / Spacing -->
+            <div class="acc-group">
+                <label>מרווח בין שורות:</label>
+                <button class="acc-btn" id="accLineHeightBtn">מרווח שורות מוגדל</button>
+            </div>
+
+            <hr />
+
+            <!-- Media Adjustments -->
+            <button class="acc-btn" id="accHideImagesBtn">🖼️ הוסתרת תמונות</button>
+            <button class="acc-btn" id="accStopAnimationsBtn">⏸️ עצירת אנימציות</button>
+
+            <hr />
+
+            <!-- Color Controls -->
+            <div class="acc-group">
+                <label>שינוי צבעים:</label>
+                <div class="acc-grid-2">
+                    <button class="acc-btn-sub" id="accColorHeadlines">צבע כותרות</button>
+                    <button class="acc-btn-sub" id="accColorText">צבע טקסט</button>
+                </div>
+                <button class="acc-btn" id="accHighContrastBtn" style="margin-top: 6px;">ניגודיות גבוהה (רקע)</button>
+            </div>
+
+            <hr />
+
+            <!-- Reset -->
+            <button class="acc-btn acc-reset-btn" id="accResetBtn">🔄 איפוס הגדרות</button>
+        </div>
+    </div>
+</div>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         // Replace 'shampoo' with the exact category slug/ID in Contentful

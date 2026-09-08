@@ -36,6 +36,13 @@ h1, h2, h3 {
     scroll-margin-top: 100px;
 }
 
+#WishListPageH1{
+    font-family: 'Suranna', serif;
+    scroll-margin-top: 100px;
+    font-size: 2.2rem;
+    color: var(--dark-brown);
+}
+
 body.no-scroll {
     overflow: hidden;
 }
@@ -1606,6 +1613,10 @@ body.acc-colored-text td {
     color: #333333;
 }
 
+#checkoutForm{
+    margin-top: 60px;
+}
+
 #checkoutForm input {
     width: 100%;
     padding: 11px 13px;
@@ -1634,6 +1645,79 @@ body.acc-colored-text td {
     font-size: 1rem;
     cursor: pointer;
     transition: background-color 0.2s ease;
+}
+
+/* Spinner Element Styling */
+.btn-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-left: 8px;
+    vertical-align: middle;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: btnSpinnerRotate 0.8s linear infinite;
+}
+
+/* Spinner Keyframe Animation */
+@keyframes btnSpinnerRotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Prevent disabled state from halting CSS animations */
+button.is-loading:disabled .btn-spinner {
+    animation-play-state: running;
+}
+
+#payBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: auto; /* Keeps hover cursor active showing not-allowed */
+}
+
+/* Wrapper layout */
+.tooltip-wrapper {
+    position: relative;
+    display: block; /* Use inline-block if button isn't full width */
+    width: 100%;
+}
+
+/* Ensure disabled button lets wrapper handle hover state */
+.tooltip-wrapper button:disabled {
+    pointer-events: none;
+}
+
+/* Tooltip Popup Box */
+.tooltip-wrapper::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 120%; /* Displays above the button */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #222222;
+    color: #ffffff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    pointer-events: none;
+    z-index: 100;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Show tooltip when hovering over wrapper ONLY if button is disabled */
+.tooltip-wrapper:has(button:disabled):hover::after {
+    opacity: 1;
+    visibility: visible;
 }
 
 #SuccesfulPurchaseBtn{
@@ -2004,3 +2088,4 @@ main iframe {
     color: #fff;
     border-color: #333;
 }
+

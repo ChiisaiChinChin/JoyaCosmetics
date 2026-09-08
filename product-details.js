@@ -2,35 +2,44 @@ document.addEventListener('DOMContentLoaded', () => {
     const container = document.getElementById('SingleProductView');
     if (!container) return;
 
-    // --- DEBUG LOGS ---
-    const rawSelected = sessionStorage.getItem('selectedProduct');
-    const rawCatalog = localStorage.getItem('allProductsCatalog');
-
-    console.log("🔍 DEBUG - Selected Product in sessionStorage:", rawSelected ? JSON.parse(rawSelected) : "EMPTY / NULL");
-    console.log("🔍 DEBUG - Catalog items in localStorage:", rawCatalog ? JSON.parse(rawCatalog).length + " items" : "EMPTY / NULL");
-
     updateWishlistBadge();
 
+    const rawSelected = sessionStorage.getItem('selectedProduct');
+
     if (!rawSelected) {
-        container.innerHTML = `
-            <div style="text-align:center; padding: 3rem 1rem;">
-                <h2>המוצר אינו קיים או שפג תוקף העמוד</h2>
-                <p>אנא חזור לקטלוג ובחר מוצר שנית.</p>
-                <button onclick="window.location.href='index.html'" style="margin-top: 1rem; padding: 0.5rem 1rem; cursor: pointer;">חזרה לקטלוג</button>
-            </div>
-        `;
+        container.replaceChildren();
+
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'text-align:center; padding: 3rem 1rem;';
+
+        const title = document.createElement('h2');
+        title.textContent = 'המוצר אינו קיים או שפג תוקף העמוד';
+
+        const desc = document.createElement('p');
+        desc.textContent = 'אנא חזור לקטלוג ובחר מוצר שנית.';
+
+        const btn = document.createElement('button');
+        btn.textContent = 'חזרה לקטלוג';
+        btn.style.cssText = 'margin-top: 1rem; padding: 0.5rem 1rem; cursor: pointer;';
+        btn.addEventListener('click', () => { window.location.href = 'index.html'; });
+
+        wrapper.appendChild(title);
+        wrapper.appendChild(desc);
+        wrapper.appendChild(btn);
+        container.appendChild(wrapper);
         return;
     }
 
-    const currentItem = JSON.parse(rawSelected);
-    renderSingleProduct(currentItem);
-    syncHeartIcons();
-    renderRelatedProducts(currentItem);
+    try {
+        const currentItem = JSON.parse(rawSelected);
+        renderSingleProduct(currentItem);
+        syncHeartIcons();
+        renderRelatedProducts(currentItem);
+    } catch (e) {
+        console.error("Error loading selected product:", e);
+    }
 });
 
-/* ==========================================
-   HELPERS: CATEGORY & IMAGE PARSING
-   ========================================== */
 function extractCategoryName(cat) {
     if (!cat) return 'Product';
     if (typeof cat === 'object') {
@@ -57,52 +66,96 @@ function renderSingleProduct(item) {
     const container = document.getElementById('SingleProductView');
     if (!container) return;
 
+    container.replaceChildren();
+
     const name = item.name || item.title || 'מוצר';
-    const price = item.price || 0;
+    const price = Number(item.price || 0);
     const isOnSale = item.onsale === true || item.onsale === "true" || item.onSale === true;
-    const salePrice = (item.saleprice !== undefined && item.saleprice !== "") ? item.saleprice : price;
+    const salePrice = (item.saleprice !== undefined && item.saleprice !== "") ? Number(item.saleprice) : price;
     const about = item.about || name;
     const Category = extractCategoryName(item.category);
-    const id = item.id;
+    const id = String(item.id);
     const imageUrl = formatImageUrl(item.img || item.image || item.pic);
-
     const activePrice = isOnSale ? salePrice : price;
-    const safeName = name.replace(/'/g, "\\'");
 
     const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
-    const isWishlisted = wishlist.some(w => String(w.id) === String(id));
-    const heartStateClass = isWishlisted ? 'filled' : 'outline';
+    const isWishlisted = wishlist.some(w => String(w.id) === id);
 
-    let priceHTML = `<div class="p-price"><span class="Price new-price">₪${price}</span></div>`;
+    // Image Element
+    const imgDiv = document.createElement('div');
+    imgDiv.className = 'product-page-image';
+    const img = document.createElement('img');
+    img.src = imageUrl;
+    img.alt = name;
+    img.onerror = () => { img.src = 'Pictures/placeholder.png'; };
+    imgDiv.appendChild(img);
+
+    // Info Element
+    const infoDiv = document.createElement('div');
+    infoDiv.className = 'product-page-info';
+
+    const h1 = document.createElement('h1');
+    h1.textContent = name;
+
+    const descP = document.createElement('p');
+    descP.className = 'description';
+    descP.textContent = about;
+
+    // Price
+    const priceDiv = document.createElement('div');
+    priceDiv.className = 'p-price';
+
     if (isOnSale && salePrice) {
-        priceHTML = `
-            <div class="p-price">
-                <span class="old-price" style="opacity: 0.5;">₪${price}</span>
-                <span class="Price new-price">₪${salePrice}</span>
-            </div>
-        `;
+        const oldSpan = document.createElement('span');
+        oldSpan.className = 'old-price';
+        oldSpan.style.opacity = '0.5';
+        oldSpan.textContent = `₪${price}`;
+
+        const newSpan = document.createElement('span');
+        newSpan.className = 'Price new-price';
+        newSpan.textContent = `₪${salePrice}`;
+
+        priceDiv.appendChild(oldSpan);
+        priceDiv.appendChild(newSpan);
+    } else {
+        const priceSpan = document.createElement('span');
+        priceSpan.className = 'Price new-price';
+        priceSpan.textContent = `₪${price}`;
+        priceDiv.appendChild(priceSpan);
     }
 
-    container.innerHTML = `
-        <div class="product-page-image">
-            <img src="${imageUrl}" alt="${name}" onerror="this.onerror=null; this.src='Pictures/placeholder.png';">
-        </div>
-        <div class="product-page-info">
-            <h1>${name}</h1>
-            <p class="description">${about}</p>
-            ${priceHTML}
+    // Actions
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'p-actions';
 
-            <div class="p-actions">
-                <button class="add-to-cart AddToCart" onclick="AddCartItem('${safeName}', '${id}', '${activePrice}', '${imageUrl}')">
-                    הוסף לסל
-                </button>
-                <i class="fa-heart wishlist-heart ${heartStateClass}" 
-                   data-id="${id}" 
-                   onclick="toggleWishlist(this, { id: '${id}', name: '${safeName}', price: ${price}, img: '${imageUrl}', category: '${Category}', onsale: ${isOnSale}, saleprice: '${salePrice}' })">
-                </i>
-            </div>
-        </div>
-    `;
+    const addBtn = document.createElement('button');
+    addBtn.className = 'add-to-cart AddToCart';
+    addBtn.textContent = 'הוסף לסל';
+    addBtn.addEventListener('click', () => {
+        if (typeof AddCartItem === 'function') {
+            AddCartItem(name, id, activePrice, imageUrl);
+        }
+    });
+
+    const heart = document.createElement('i');
+    heart.className = `fa-heart wishlist-heart ${isWishlisted ? 'fa-solid filled' : 'fa-regular outline'}`;
+    heart.dataset.id = id;
+    heart.addEventListener('click', function () {
+        toggleWishlist(this, {
+            id, name, price, img: imageUrl, category: Category, onsale: isOnSale, saleprice: salePrice
+        });
+    });
+
+    actionsDiv.appendChild(addBtn);
+    actionsDiv.appendChild(heart);
+
+    infoDiv.appendChild(h1);
+    infoDiv.appendChild(descP);
+    infoDiv.appendChild(priceDiv);
+    infoDiv.appendChild(actionsDiv);
+
+    container.appendChild(imgDiv);
+    container.appendChild(infoDiv);
 }
 
 /* ==========================================
@@ -113,8 +166,9 @@ function renderRelatedProducts(currentProduct) {
     const section = document.querySelector('.related-products-section');
     if (!container) return;
 
-    const rawCatalog = JSON.parse(localStorage.getItem('allProductsCatalog')) || [];
+    container.replaceChildren();
 
+    const rawCatalog = JSON.parse(localStorage.getItem('allProductsCatalog')) || [];
     if (!rawCatalog || rawCatalog.length === 0) {
         if (section) section.style.display = 'none';
         return;
@@ -122,12 +176,17 @@ function renderRelatedProducts(currentProduct) {
 
     const normalizedCatalog = rawCatalog.map(item => {
         const fields = item.fields || item;
+        const price = Number(fields.price || 0);
+        const isOnSale = fields.onsale === true || fields.onSale === true;
+        const salePrice = fields.saleprice || fields.salePrice || price;
+
         return {
             id: String(fields.id || item.sys?.id || ''),
             name: fields.name || fields.title || 'מוצר',
-            price: fields.price || 0,
-            saleprice: fields.saleprice || fields.salePrice || '',
-            onsale: fields.onsale === true || fields.onSale === true,
+            price: price,
+            saleprice: salePrice,
+            onsale: isOnSale,
+            activePrice: isOnSale ? salePrice : price,
             category: extractCategoryName(fields.category || fields.Category),
             about: fields.about || fields.name || '',
             img: formatImageUrl(fields.pic || fields.img || fields.image)
@@ -138,8 +197,7 @@ function renderRelatedProducts(currentProduct) {
     const currentId = String(currentProduct.id || '');
 
     let relatedItems = normalizedCatalog.filter(item => {
-        const itemCat = item.category.toLowerCase().trim();
-        return itemCat === currentCategory && item.id !== currentId;
+        return item.category.toLowerCase().trim() === currentCategory && item.id !== currentId;
     });
 
     if (relatedItems.length === 0) {
@@ -153,78 +211,39 @@ function renderRelatedProducts(currentProduct) {
 
     if (section) section.style.display = 'block';
 
-    const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+    const fragment = document.createDocumentFragment();
 
-    container.innerHTML = relatedItems.slice(0, 4).map(item => {
-        const safeTitle = item.name.replace(/'/g, "\\'");
-        const activePrice = item.onsale && item.saleprice ? item.saleprice : item.price;
-        const isWishlisted = wishlist.some(w => String(w.id) === String(item.id));
-        const heartStateClass = isWishlisted ? 'filled' : 'outline';
-        const safeItemJSON = JSON.stringify(item).replace(/"/g, '&quot;');
-
-        let priceHTML = `<div class="p-price"><span class="Price new-price">₪${item.price}</span></div>`;
-        if (item.onsale && item.saleprice) {
-            priceHTML = `
-                <div class="p-price">
-                    <span class="old-price" style="opacity: 0.5;">₪${item.price}</span>
-                    <span class="Price new-price">₪${item.saleprice}</span>
-                </div>
-            `;
+    relatedItems.slice(0, 4).forEach(item => {
+        if (typeof createProductCard === 'function') {
+            fragment.appendChild(createProductCard(item));
         }
+    });
 
-        return `
-        <li>
-            <div class="product-card no-border" id="${item.id}">
-                <div class="product-image">
-                    <img class="ProductImg" 
-                         onclick="goToProductPage(${safeItemJSON})" 
-                         alt="${item.name}" 
-                         src="${item.img}" 
-                         onerror="this.onerror=null; this.src='Pictures/placeholder.png';"
-                         style="cursor: pointer;" />
-                </div>
-                <div class="product-info">
-                    <p class="p-name About" 
-                       onclick="goToProductPage(${safeItemJSON})" 
-                       style="cursor: pointer;">
-                       ${item.about}
-                    </p>
-                    <p class="p-category AboutInv">${item.category}</p>
-                    ${priceHTML}
-                    <div class="p-actions">
-                        <button class="add-to-cart AddToCart" name="${item.id}" onclick="AddCartItem('${safeTitle}', '${item.id}', '${activePrice}', '${item.img}')">
-                            הוסף לסל
-                        </button>
-                        <i class="fa-heart wishlist-heart ${heartStateClass}" 
-                            data-id="${item.id}" 
-                            onclick="toggleWishlist(this, { id: '${item.id}', name: '${safeTitle}', price: ${item.price}, img: '${item.img}', category: '${item.category}', onsale: ${item.onsale}, saleprice: '${item.saleprice}' })">
-                        </i>
-                    </div>
-                </div>
-            </div>
-        </li>
-        `;
-    }).join('');
+    container.appendChild(fragment);
+    syncHeartIcons();
 }
 
 /* ==========================================
-   3. WISHLIST & ROUTING HELPERS
+   3. WISHLIST HELPERS
    ========================================== */
 window.toggleWishlist = function(element, product) {
     if (!product || !product.id) return;
 
-    const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+    let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
     const existingIndex = wishlist.findIndex(item => String(item.id) === String(product.id));
 
     if (existingIndex > -1) {
         wishlist.splice(existingIndex, 1);
+        element.classList.remove('filled', 'fa-solid');
+        element.classList.add('outline', 'fa-regular');
     } else {
         wishlist.push(product);
+        element.classList.remove('outline', 'fa-regular');
+        element.classList.add('filled', 'fa-solid');
     }
 
     localStorage.setItem('wishlist', JSON.stringify(wishlist));
     updateWishlistBadge();
-    syncHeartIcons();
 };
 
 function syncHeartIcons() {
@@ -235,11 +254,11 @@ function syncHeartIcons() {
 
         const existsInWishlist = wishlist.some(item => String(item.id) === String(productId));
         if (existsInWishlist) {
-            heart.classList.remove('outline');
-            heart.classList.add('filled');
+            heart.classList.remove('outline', 'fa-regular');
+            heart.classList.add('filled', 'fa-solid');
         } else {
-            heart.classList.remove('filled');
-            heart.classList.add('outline');
+            heart.classList.remove('filled', 'fa-solid');
+            heart.classList.add('outline', 'fa-regular');
         }
     });
 }
@@ -251,8 +270,3 @@ function updateWishlistBadge() {
         wishlistBadge.textContent = wishlist.length;
     }
 }
-
-window.goToProductPage = function(product) {
-    sessionStorage.setItem('selectedProduct', JSON.stringify(product));
-    window.location.href = `product.html?id=${product.id}`;
-};

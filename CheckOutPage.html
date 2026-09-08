@@ -12,7 +12,6 @@
 
   <!-- App JavaScript -->
   <script src="product-details.js"></script>
-  <script src="index.js"></script>
 </head>
 
 <body>
@@ -66,8 +65,9 @@
     <div class="logo">JOYA COSMETICS</div>
   </div>
 </header>
+
 <main class="container page-main">
-  <div id="checkoutModal" class="checkout-content">
+  <div id="checkoutModal" class="checkout-content" style="margin: 20px 0; min-width: 600px;">
     <h2>סיכום הזמנה - Joya Cosmetics</h2>
 
     <!-- Cart Items Summary List -->
@@ -78,12 +78,24 @@
       </div>
     </div>
 
-    <!-- Total Display -->
-    <div class="cart-summary">
-      <p><span>סה"כ לתשלום:</span> <strong id="modalTotal">₪0.00</strong></p>
+    <!-- Total Display with Delivery Breakdown -->
+    <div class="cart-summary" style="margin-top: 15px; border-top: 1px solid #ddd; padding-top: 10px;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+        <span>סכום ביניים:</span>
+        <strong id="modalSubtotal">₪0.00</strong>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+        <span>דמי משלוח:</span>
+        <strong id="modalDelivery">₪20.00</strong>
+      </div>
+      <hr style="border: 0; border-top: 1px dashed #ccc; margin: 10px 0;">
+      <div style="display: flex; justify-content: space-between; font-size: 1.2rem;">
+        <span>סה"כ לתשלום (כולל משלוח):</span>
+        <strong id="modalTotal" style="color: #d88195;">₪0.00</strong>
+      </div>
     </div>
 
-    <form id="checkoutForm" onsubmit="handleCheckout(event)">
+    <form id="checkoutForm">
       <label for="firstName">שם פרטי:</label>
       <input type="text" id="firstName" required placeholder="ישראל">
 
@@ -99,7 +111,7 @@
       <label for="custAddress">כתובת למשלוח:</label>
       <input type="text" id="custAddress" required placeholder="רחוב, מספר בית, עיר">
 
-      <button type="submit" id="payBtn" class="primary-btn">מעבר לתשלום מאובטח</button>
+      <button type="submit" id="payBtn" class="primary-btn" onclick="PlayBtnAnim()">מעבר לתשלום מאובטח</button>
     </form>
   </div>
 </main>
@@ -122,6 +134,7 @@
     </div>
   </div>
 </div>
+
 <!-- SIDE MENU OVERLAY & DRAWER -->
 <div id="menuOverlay" class="menu-overlay" onclick="toggleMenu()"></div>
 <aside id="sideMenu" class="side-menu">
@@ -161,6 +174,7 @@
     <li><a href="WebsiteRegulations.html">הצהרת נגישות</a></li>
   </ul>
 </aside>
+
 <!-- Cookie & Regulations Popup -->
 <div id="cookieBanner" class="cookie-banner hidden">
   <div class="cookie-content">
@@ -170,6 +184,7 @@
     <button id="acceptCookiesBtn" class="cookie-btn">אני מסכים/ה</button>
   </div>
 </div>
+
 <!-- FOOTER -->
 <footer class="footer">
   <div class="container footer-grid">
@@ -223,13 +238,84 @@
     <p>© כל הזכויות שמורות ל-JOYA COSMETICS</p>
   </div>
 </footer>
+<!-- Accessibility Floating Button & Menu -->
+<div id="accWidget" class="acc-widget">
+  <button id="accToggleBtn" class="acc-toggle-btn" aria-label="פתח תפריט נגישות" title="תפריט נגישות">
+    <img src="Pictures/Disability-Wheelchair--Streamline-Ultimate.png" alt="נגישות" class="acc-icon">
+  </button>
+
+  <div id="accMenu" class="acc-menu hidden" aria-hidden="true">
+    <div class="acc-header">
+      <h3>תפריט נגישות</h3>
+      <button id="accCloseBtn" class="acc-close-btn" aria-label="סגור תפריט">&times;</button>
+    </div>
+
+    <div class="acc-body">
+      <!-- Screen Reader / Text-to-Speech -->
+      <button class="acc-btn" id="accReadTextBtn">🔊 הקראת טקסט (מסומן)</button>
+
+      <!-- Audio Mute -->
+      <button class="acc-btn" id="accMuteSoundsBtn">🔇 השתקת צלילים</button>
+
+      <hr />
+
+      <!-- Text Alignment -->
+      <div class="acc-group">
+        <label>יישור טקסט:</label>
+        <div class="acc-grid-3">
+          <button class="acc-btn-sub" id="accAlignRight">ימין</button>
+          <button class="acc-btn-sub" id="accAlignCenter">מרכז</button>
+          <button class="acc-btn-sub" id="accAlignLeft">שמאל</button>
+        </div>
+      </div>
+
+      <!-- Letter Spacing -->
+      <div class="acc-group">
+        <label>רווח בין אותיות:</label>
+        <button class="acc-btn" id="accLetterSpacingBtn">א - א - א (רווח אותיות)</button>
+      </div>
+
+      <!-- Line Height / Spacing -->
+      <div class="acc-group">
+        <label>מרווח בין שורות:</label>
+        <button class="acc-btn" id="accLineHeightBtn">מרווח שורות מוגדל</button>
+      </div>
+
+      <hr />
+
+      <!-- Media Adjustments -->
+      <button class="acc-btn" id="accHideImagesBtn">🖼️ הוסתרת תמונות</button>
+      <button class="acc-btn" id="accStopAnimationsBtn">⏸️ עצירת אנימציות</button>
+
+      <hr />
+
+      <!-- Color Controls -->
+      <div class="acc-group">
+        <label>שינוי צבעים:</label>
+        <div class="acc-grid-2">
+          <button class="acc-btn-sub" id="accColorHeadlines">צבע כותרות</button>
+          <button class="acc-btn-sub" id="accColorText">צבע טקסט</button>
+        </div>
+        <button class="acc-btn" id="accHighContrastBtn" style="margin-top: 6px;">ניגודיות גבוהה (רקע)</button>
+      </div>
+
+      <hr />
+
+      <!-- Reset -->
+      <button class="acc-btn acc-reset-btn" id="accResetBtn">🔄 איפוס הגדרות</button>
+    </div>
+  </div>
+</div>
+<script src="index.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     renderCheckoutSummary();
   });
 
+  const FREE_SHIPPING_THRESHOLD = 250.00;
+  const BASE_DELIVERY_FEE = 35.00;
+
   function renderCheckoutSummary() {
-    // 1. Check multiple potential localStorage keys
     const rawCart = localStorage.getItem('cart')
             || localStorage.getItem('joya_cart')
             || localStorage.getItem('cartItems')
@@ -237,33 +323,33 @@
             || '[]';
 
     const cart = JSON.parse(rawCart);
-    console.log('Cart retrieved from storage:', cart); // Debug log
 
     const container = document.getElementById('checkoutItems');
+    const subtotalElement = document.getElementById('modalSubtotal');
+    const deliveryElement = document.getElementById('modalDelivery');
     const totalElement = document.getElementById('modalTotal');
     const payBtn = document.getElementById('payBtn');
 
     if (!cart || cart.length === 0) {
       if (container) container.innerHTML = '<p style="text-align:center; color:#888;">העגלה שלך ריקה (לא נמצאו מוצרים בזיכרון)</p>';
+      if (subtotalElement) subtotalElement.textContent = '₪0.00';
+      if (deliveryElement) deliveryElement.textContent = '₪0.00';
       if (totalElement) totalElement.textContent = '₪0.00';
       if (payBtn) payBtn.disabled = true;
-      return;
+      return { grandTotal: 0, deliveryFee: 0 };
     }
 
-    let grandTotal = 0;
+    let itemsSubtotal = 0;
     if (container) container.innerHTML = '';
 
     cart.forEach(item => {
-      // 2. Normalize property names (handles title/name/productName & price string formats)
       const title = item.title || item.name || item.productName || item.fields?.title || 'מוצר';
       const rawPrice = item.price || item.fields?.price || 0;
-
-      // Clean non-numeric characters from price if stored as string like "₪45"
       const priceNum = typeof rawPrice === 'number' ? rawPrice : parseFloat(String(rawPrice).replace(/[^\d.]/g, '')) || 0;
       const quantity = parseInt(item.quantity || item.qty || 1, 10);
 
       const itemTotal = priceNum * quantity;
-      grandTotal += itemTotal;
+      itemsSubtotal += itemTotal;
 
       if (container) {
         const row = document.createElement('div');
@@ -280,9 +366,20 @@
       }
     });
 
-    if (totalElement) {
-      totalElement.textContent = `₪${grandTotal.toFixed(2)}`;
+    const deliveryFee = itemsSubtotal >= FREE_SHIPPING_THRESHOLD ? 0 : BASE_DELIVERY_FEE;
+    const grandTotal = itemsSubtotal + deliveryFee;
+
+    if (subtotalElement) subtotalElement.textContent = `₪${itemsSubtotal.toFixed(2)}`;
+    if (deliveryElement) {
+      if (deliveryFee === 0) {
+        deliveryElement.innerHTML = '<span style="color: #bd2130; font-weight: bold;">חינם</span>';
+      } else {
+        deliveryElement.textContent = `₪${deliveryFee.toFixed(2)}`;
+      }
     }
+    if (totalElement) totalElement.textContent = `₪${grandTotal.toFixed(2)}`;
+
+    return { grandTotal, deliveryFee };
   }
 </script>
 </body>

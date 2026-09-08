@@ -201,67 +201,72 @@
     </div>
 </footer>
 </body>
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        renderCheckoutSummary();
-        clearCart();
-    });
+<!-- Accessibility Floating Button & Menu -->
+<div id="accWidget" class="acc-widget">
+    <button id="accToggleBtn" class="acc-toggle-btn" aria-label="פתח תפריט נגישות" title="תפריט נגישות">
+        <img src="Pictures/Disability-Wheelchair--Streamline-Ultimate.png" alt="נגישות" class="acc-icon">
+    </button>
 
-    function renderCheckoutSummary() {
-        // 1. Check multiple potential localStorage keys
-        const rawCart = localStorage.getItem('cart')
-            || localStorage.getItem('joya_cart')
-            || localStorage.getItem('cartItems')
-            || localStorage.getItem('shoppingCart')
-            || '[]';
+    <div id="accMenu" class="acc-menu hidden" aria-hidden="true">
+        <div class="acc-header">
+            <h3>תפריט נגישות</h3>
+            <button id="accCloseBtn" class="acc-close-btn" aria-label="סגור תפריט">&times;</button>
+        </div>
 
-        const cart = JSON.parse(rawCart);
-        console.log('Cart retrieved from storage:', cart); // Debug log
+        <div class="acc-body">
+            <!-- Screen Reader / Text-to-Speech -->
+            <button class="acc-btn" id="accReadTextBtn">🔊 הקראת טקסט (מסומן)</button>
 
-        const container = document.getElementById('checkoutItems');
-        const totalElement = document.getElementById('modalTotal');
-        const payBtn = document.getElementById('payBtn');
+            <!-- Audio Mute -->
+            <button class="acc-btn" id="accMuteSoundsBtn">🔇 השתקת צלילים</button>
 
-        if (!cart || cart.length === 0) {
-            if (container) container.innerHTML = '<p style="text-align:center; color:#888;">העגלה שלך ריקה (לא נמצאו מוצרים בזיכרון)</p>';
-            if (totalElement) totalElement.textContent = '₪0.00';
-            if (payBtn) payBtn.disabled = true;
-            return;
-        }
+            <hr />
 
-        let grandTotal = 0;
-        if (container) container.innerHTML = '';
-
-        cart.forEach(item => {
-            // 2. Normalize property names (handles title/name/productName & price string formats)
-            const title = item.title || item.name || item.productName || item.fields?.title || 'מוצר';
-            const rawPrice = item.price || item.fields?.price || 0;
-
-            // Clean non-numeric characters from price if stored as string like "₪45"
-            const priceNum = typeof rawPrice === 'number' ? rawPrice : parseFloat(String(rawPrice).replace(/[^\d.]/g, '')) || 0;
-            const quantity = parseInt(item.quantity || item.qty || 1, 10);
-
-            const itemTotal = priceNum * quantity;
-            grandTotal += itemTotal;
-
-            if (container) {
-                const row = document.createElement('div');
-                row.innerHTML = `
-          <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #eee;">
-            <div>
-              <span style="font-weight: 600;">${title}</span>
-              <span style="color: #777;"> (x${quantity})</span>
+            <!-- Text Alignment -->
+            <div class="acc-group">
+                <label>יישור טקסט:</label>
+                <div class="acc-grid-3">
+                    <button class="acc-btn-sub" id="accAlignRight">ימין</button>
+                    <button class="acc-btn-sub" id="accAlignCenter">מרכז</button>
+                    <button class="acc-btn-sub" id="accAlignLeft">שמאל</button>
+                </div>
             </div>
-            <span style="font-weight: bold; color: #d88195;">₪${itemTotal.toFixed(2)}</span>
-          </div>
-        `;
-                container.appendChild(row);
-            }
-        });
 
-        if (totalElement) {
-            totalElement.textContent = `₪${grandTotal.toFixed(2)}`;
-        }
-    }
-</script>
+            <!-- Letter Spacing -->
+            <div class="acc-group">
+                <label>רווח בין אותיות:</label>
+                <button class="acc-btn" id="accLetterSpacingBtn">א - א - א (רווח אותיות)</button>
+            </div>
+
+            <!-- Line Height / Spacing -->
+            <div class="acc-group">
+                <label>מרווח בין שורות:</label>
+                <button class="acc-btn" id="accLineHeightBtn">מרווח שורות מוגדל</button>
+            </div>
+
+            <hr />
+
+            <!-- Media Adjustments -->
+            <button class="acc-btn" id="accHideImagesBtn">🖼️ הוסתרת תמונות</button>
+            <button class="acc-btn" id="accStopAnimationsBtn">⏸️ עצירת אנימציות</button>
+
+            <hr />
+
+            <!-- Color Controls -->
+            <div class="acc-group">
+                <label>שינוי צבעים:</label>
+                <div class="acc-grid-2">
+                    <button class="acc-btn-sub" id="accColorHeadlines">צבע כותרות</button>
+                    <button class="acc-btn-sub" id="accColorText">צבע טקסט</button>
+                </div>
+                <button class="acc-btn" id="accHighContrastBtn" style="margin-top: 6px;">ניגודיות גבוהה (רקע)</button>
+            </div>
+
+            <hr />
+
+            <!-- Reset -->
+            <button class="acc-btn acc-reset-btn" id="accResetBtn">🔄 איפוס הגדרות</button>
+        </div>
+    </div>
+</div>
 </html>
