@@ -1312,11 +1312,9 @@ function initMobileBannerSwipes() {
     if (heroContainer) {
         attachSwipeHandler(heroContainer, {
             onSwipeLeft: () => {
-                // Next slide in RTL flow
                 if (typeof moveBanner === 'function') moveBanner(-1);
             },
             onSwipeRight: () => {
-                // Previous slide in RTL flow
                 if (typeof moveBanner === 'function') moveBanner(1);
             }
         });
@@ -1327,11 +1325,9 @@ function initMobileBannerSwipes() {
     if (dualContainer) {
         attachSwipeHandler(dualContainer, {
             onSwipeLeft: () => {
-                // Next slide in RTL flow
                 if (typeof moveSlide === 'function') moveSlide('dualBannersCarousel', -1);
             },
             onSwipeRight: () => {
-                // Previous slide in RTL flow
                 if (typeof moveSlide === 'function') moveSlide('dualBannersCarousel', 1);
             }
         });
