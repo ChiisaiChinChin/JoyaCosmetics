@@ -767,7 +767,7 @@ if (checkoutForm) {
             name: document.getElementById('firstName') + " " + document.getElementById('lastName'),
             email: document.getElementById('custEmail')?.value || '',
             phone: document.getElementById('custPhone')?.value || '',
-            adress: document.getElementById('custAddress')?.value || '',
+            adress: document.getElementById('custAddress')?.value +  document.getElementById('custCity')?.value,
         };
 
         try {
