@@ -17,6 +17,167 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 
+    <style>
+        /* ==========================================
+          Thank You / Order Confirmation Page
+       ========================================== */
+
+        .page-main {
+            min-height: 70vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 15px;
+        }
+
+        #checkoutModal.checkout-content {
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto !important;
+        }
+
+        #checkoutModal h2 {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #888888;
+            margin-bottom: 20px;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        /* Main Card Container */
+        .thank-you-box {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 35px 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f0ebe6;
+            text-align: right;
+        }
+
+        .thank-you-box h1 {
+            font-size: 1.8rem;
+            color: black;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Green Checkmark Icon */
+        .thank-you-box h1::before {
+            content: "\f00c";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            color: #27ae60;
+            font-size: 1.5rem;
+            background: #eafaf1;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .thank-you-box > p {
+            font-size: 1.05rem;
+            color: #666666;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #e5e5e5;
+        }
+
+        .thank-you-box #order-id {
+            color: #d88195;
+            font-family: monospace;
+            font-size: 1.1rem;
+        }
+
+        /* Details Box Sections */
+        .details-section {
+            background-color: #faf7f5;
+            border-radius: 8px;
+            padding: 18px 20px;
+            margin-bottom: 18px;
+            border-right: 4px solid #d88195;
+        }
+
+        .details-section h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.05rem;
+            color: black;
+            font-weight: 600;
+        }
+
+        .details-section p {
+            margin: 6px 0;
+            font-size: 0.95rem;
+            color: #444444;
+            line-height: 1.5;
+        }
+
+        /* Item List Formatting */
+        #items-list {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0;
+        }
+
+        #items-list li {
+            padding: 8px 12px;
+            background: #ffffff;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            font-size: 0.95rem;
+            color: #333333;
+            border: 1px solid #ede8e3;
+        }
+
+        /* Price Section */
+        .total-price {
+            font-size: 1.1rem;
+            margin-top: 15px;
+            padding-top: 12px;
+            border-top: 1px solid #e5e5e5;
+            color: #d88195;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .total-price span {
+            color: #27ae60;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        /* Back to Home CTA Button */
+        #SuccesfulPurchaseBtn {
+            display: block;
+            width: 100%;
+            max-width: 280px;
+            margin: 25px auto 0 auto;
+            padding: 14px 20px;
+            background-color: #d88195;
+            color: #ffffff;
+            border: none;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        #SuccesfulPurchaseBtn:hover {
+            background-color: #c46d81;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(216, 129, 149, 0.35);
+        }
+    </style>
+
     <!-- App JavaScript -->
     <script src="product-details.js"></script>
     <script src="index.js"></script>
@@ -74,14 +235,24 @@
     </div>
 </header>
 <main class="container page-main">
-    <div id="checkoutModal" class="checkout-content">
+    <div id="checkoutModal" class="checkout-content" style="margin: 20% 0">
         <h2>סיכום הזמנה - Joya Cosmetics</h2>
 
-        <!-- Cart Items Summary List -->
-        <div class="cart-items-summary">
-            <h3>הפריטים שהוזמנו:</h3>
-            <div id="checkoutItems" class="checkout-items-list">
-                <!-- JS will inject cart items here -->
+        <div dir="rtl" class="thank-you-box">
+            <h1>תודה על הזמנתך!</h1>
+            <p>מספר הזמנה: <strong id="order-id"></strong></p>
+
+            <div class="details-section">
+                <h3>פרטי משלוח:</h3>
+                <p><b>שם:</b> <span id="customer-name"></span></p>
+                <p><b>כתובת:</b> <span id="customer-address"></span></p>
+                <p><b>טלפון:</b> <span id="customer-phone"></span></p>
+            </div>
+
+            <div class="details-section">
+                <h3>סיכום הזמנה</h3>
+                <ul id="items-list"></ul>
+                <p class="total-price"><b>סה"כ שולם:</b> <span id="order-total"></span></p>
             </div>
         </div>
 
@@ -207,7 +378,7 @@
         <p>© כל הזכויות שמורות ל-JOYA COSMETICS</p>
     </div>
 </footer>
-</body>
+
 <!-- Accessibility Floating Button & Menu -->
 <div id="accWidget" class="acc-widget">
     <button id="accToggleBtn" class="acc-toggle-btn" aria-label="פתח תפריט נגישות" title="תפריט נגישות">
@@ -276,4 +447,43 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const rawOrder = sessionStorage.getItem('lastCompletedOrder');
+
+        // Redirect to home if accessed directly without placing an order
+        if (!rawOrder) {
+            window.location.href = 'index.html';
+            return;
+        }
+
+        try {
+            const order = JSON.parse(rawOrder);
+
+            // Populate order and customer details
+            document.getElementById('order-id').textContent = order.orderId || '';
+            document.getElementById('customer-name').textContent = order.name || '';
+            document.getElementById('customer-address').textContent = order.address || '';
+            document.getElementById('customer-phone').textContent = order.phone || '';
+            document.getElementById('order-total').textContent = order.amount + "₪" || 0 + "₪";
+
+            // Render product list
+            const itemsList = document.getElementById('items-list');
+            itemsList.innerHTML = '';
+
+            if (Array.isArray(order.items)) {
+                order.items.forEach(item => {
+                    const li = document.createElement('li');
+                    li.style.padding = '4px 0';
+                    li.textContent = `${item.name} - ${item.quantity} יח'`;
+                    itemsList.appendChild(li);
+                });
+            }
+        } catch (e) {
+            console.error('Error parsing order data:', e);
+        }
+    });
+</script>
+</body>
 </html>
