@@ -767,7 +767,7 @@ if (checkoutForm) {
             name: document.getElementById('firstName') + " " + document.getElementById('lastName'),
             email: document.getElementById('custEmail')?.value || '',
             phone: document.getElementById('custPhone')?.value || '',
-            adress: document.getElementById('custAddress')?.value +  document.getElementById('custCity')?.value,
+            adress: document.getElementById('custAddress')?.value + document.getElementById('custCity')?.value,
         };
 
         try {
@@ -1116,7 +1116,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const LastnameInput = document.getElementById('lastName')?.value || '';
             const emailInput = document.getElementById('custEmail')?.value || '';
             const phoneInput = document.getElementById('custPhone')?.value || '';
-            const adressInput = document.getElementById('custAddress')?.value || '';
+            const adressInput = document.getElementById('custAddress')?.value +  document.getElementById('custCity')?.value|| '';
 
             sendCheckoutToMake({
                 name: (FirstnameInput + " " + LastnameInput).trim(),
