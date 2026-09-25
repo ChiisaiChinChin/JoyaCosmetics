@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /CheckOutPage.html
+Disallow: /WishListPage.html
+Disallow: /אישור קנייה.html
+
+Sitemap: https://joya-cosmetics.com/sitemap.xml
