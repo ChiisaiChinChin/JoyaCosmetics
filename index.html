@@ -45,7 +45,6 @@
 
     <!-- App JavaScript -->
     <script src="product-details.js"></script>
-    <script src="index.js"></script>
 </head>
 <body>
 
@@ -56,6 +55,12 @@
     </iframe>
     </noscript>
 <!-- End Google Tag Manager (noscript) -->
+    <!--Promotions Strip-->
+    <div class="promo-strip-container">
+        <div class="promo-strip-track" id="promoStripTrack">
+            <!-- המבצעים ייטענו לכאן -->
+        </div>
+    </div>
 
 <!-- HEADER NAVIGATION -->
 <header class="header">
@@ -324,6 +329,7 @@
     </div>
 </div>
 
+    <script src="index.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         renderDualBanners(dualBannersData);

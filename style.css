@@ -533,7 +533,7 @@ footer {
 }
 
 .checkout-items-list {
-    max-height: 180px;
+    max-height: 600px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -2106,3 +2106,103 @@ main iframe {
     border-color: #333;
 }
 
+/* Loading Spinner Style for checkout form*/
+.spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 0.8s ease-in-out infinite;
+    margin-left: 8px; /* Adjust spacing for Hebrew RTL layout if needed */
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/*tooltip for checkout form*/
+/* Ensure the button is relative so the tooltip positions correctly */
+#payBtn, .primary-btn {
+    position: relative;
+}
+
+/* Tooltip text box */
+#payBtn.form-disabled:hover::after,
+.primary-btn.form-disabled:hover::after {
+    content: "יש למלא את כל שדות החובה לפני המשך התשלום";
+    position: absolute;
+    bottom: 120%; /* Positions it right above the button */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    z-index: 1000;
+    pointer-events: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Tooltip small arrow triangle */
+#payBtn.form-disabled:hover::before,
+.primary-btn.form-disabled:hover::before {
+    content: "";
+    position: absolute;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+/* Promotion Strip Styling */
+/* עיצוב הפס העליון */
+.promo-strip-container {
+    background-color: #111;
+    color: #fff;
+    overflow: hidden;
+    height: 36px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    font-size: 0.88rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.promo-strip-track {
+    display: flex;
+    gap: 80px;
+    animation: scrollTicker 40s linear infinite; /* Adjust speed here (lower = faster) */
+    width: max-content;
+}
+
+.promo-strip-container:hover .promo-strip-track {
+    animation-play-state: paused;
+}
+
+.promo-strip-item {
+    display: flex;
+    align-items: center;
+    gap: 200px;
+    flex-shrink: 0;
+}
+
+@keyframes scrollTicker {
+    0% {
+        transform: translateX(100%);
+    }
+    100% {
+        transform: translateX(-220%); /* Shifts exactly one full set smoothly */
+    }
+}

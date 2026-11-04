@@ -4,6 +4,81 @@ const client = contentful.createClient({
     accessToken: 'RZOFA-Qr_tng7FiHxqvX7qaomtZ8oaJzuasdIZYhgk4'
 });
 
+// Global promotional settings (with defaults if API call fails)
+let activePromotions = {
+    nPlusOneSale: 0,
+    freeShipping: 0,
+    mysteryGift: 0,
+};
+
+// Fetch global store settings from Contentful
+async function fetchStoreSettings() {
+    try {
+        const response = await client.getEntries({
+            content_type: 'storeSettings',
+            limit: 1
+        });
+
+        if (response.items && response.items.length > 0) {
+            const fields = response.items[0].fields;
+            activePromotions = {
+                nPlusOneSale: Number(fields.nPlusOneSale || fields.nPlusOne || 0),
+                freeShipping: Number(fields.freeShipping || fields.freeShippingThreshold || 0),
+                mysteryGift: Number(fields.mysteryGift || fields.mysteryGiftThreshold || 0),
+            };
+            console.log("✅ Store settings loaded from Contentful:", activePromotions);
+
+            initPromoStrip();
+
+            // 👉 ADD THIS LINE SO THE CART UPDATES AUTOMATICALLY ONCE SETTINGS LOAD
+            if (typeof renderCart === 'function') {
+                renderCart();
+            }
+        }
+    } catch (error) {
+        console.warn("⚠️ Could not load store settings from Contentful, using default values.", error);
+    }
+}
+
+// טעינה והרצה של פס המבצעים הנע
+function initPromoStrip() {
+    const container = document.getElementById('promoStripTrack');
+    const wrapper = document.querySelector('.promo-strip-container'); // המעטפת החיצונית
+    if (!container || !wrapper) return;
+
+    let promoMessages = [];
+
+    // 1. אוספים את כל המבצעים הפעילים
+    if (activePromotions.nPlusOneSale > 0) {
+        promoMessages.push(`🎁 מבצע מיוחד! קני ${activePromotions.nPlusOneSale} מוצרים וקבלי מוצר במתנה!`);
+    }
+    if (activePromotions.freeShipping > 0) {
+        promoMessages.push(`🚚 משלוח חינם בקנייה מעל ₪${activePromotions.freeShipping}!`);
+    }
+    if (activePromotions.mysteryGift > 0) {
+        promoMessages.push(`✨ מתנה מפתיעה בכל קנייה מעל ${activePromotions.mysteryGift} מוצרים!`);
+    }
+
+    // 2. אם אין אף מבצע פעיל - הסתר לחלוטין את הפס העליון
+    if (promoMessages.length === 0) {
+        wrapper.style.display = 'none';
+        return;
+    }
+
+    // אם יש מבצעים, ודא שהפס מוצג
+    wrapper.style.display = 'flex';
+
+    // 3. יצירת אלמנטי ה-HTML
+    const itemsHTML = promoMessages.map(msg => `
+        <div class="promo-strip-item">
+            <span>${msg}</span>
+        </div>
+    `).join('');
+
+    // 4. תמיד מכפילים פי 3 כדי לשמור על האנימציה האופקית האינסופית והחלקה
+    container.innerHTML = itemsHTML + itemsHTML + itemsHTML;
+}
+
 var allProducts = [];
 let wishlist = getWishlist();
 var currentPath = "";
@@ -254,6 +329,240 @@ function syncCartWithContentful(fetchedProducts) {
     }
 }
 
+
+function displayProducts(products) {
+    const container = document.getElementById('ItemsList');
+    if (!container) return;
+
+    container.replaceChildren();
+
+    if (!Array.isArray(products) || products.length === 0) {
+        const msg = document.createElement("p");
+        msg.className = "no-products";
+        msg.textContent = "אין מוצרים זמינים כרגע.";
+        container.appendChild(msg);
+        return;
+    }
+
+    const targetCategory = container.getAttribute('data-category');
+    const isSalePage = container.getAttribute('data-sale') === "true";
+
+    let filtered = products.map(p => p.fields ? normalizeProduct(p) : p);
+
+    if (targetCategory) {
+        filtered = filtered.filter(item => item.category === targetCategory);
+    }
+    if (isSalePage) {
+        filtered = filtered.filter(item => item.onsale);
+    }
+
+    if (filtered.length === 0) {
+        const msg = document.createElement("p");
+        msg.className = "no-products";
+        msg.textContent = isSalePage ? "אין מוצרים במבצע כרגע." : "אין מוצרים זמינים בקטגוריה זו כרגע.";
+        container.appendChild(msg);
+        return;
+    }
+
+    const fragment = document.createDocumentFragment();
+    filtered.forEach(item => {
+        fragment.appendChild(createProductCard(item));
+    });
+
+    container.appendChild(fragment);
+    syncHeartIcons();
+}
+
+/* ==========================================
+   9. CAROUSELS & BANNERS LOGIC
+   ========================================== */
+const carouselStates = {
+    mainHeroCarousel: 0,
+    dualBannersCarousel: 0
+};
+
+window.moveSlide = function (carouselId, direction) {
+    const carousel = document.getElementById(carouselId);
+    if (!carousel) return;
+
+    const slides = carousel.querySelectorAll('.carousel-slide');
+    const totalSlides = slides.length;
+    if (totalSlides === 0) return;
+
+    let currentIndex = carouselStates[carouselId] || 0;
+    currentIndex = (currentIndex + direction + totalSlides) % totalSlides;
+
+    goToSlide(carouselId, currentIndex);
+};
+
+function goToSlide(carouselId, slideIndex) {
+    const carousel = document.getElementById(carouselId);
+    if (!carousel) return;
+
+    const track = carousel.querySelector('.carousel-track');
+    const slides = carousel.querySelectorAll('.carousel-slide');
+    const dots = carousel.querySelectorAll('.carousel-dots .dot');
+
+    if (!track || slides.length === 0) return;
+
+    if (slideIndex < 0 || slideIndex >= slides.length) return;
+
+    carouselStates[carouselId] = slideIndex;
+    track.style.transform = `translateX(${slideIndex * 100}%)`;
+
+    slides.forEach((slide, idx) => {
+        slide.classList.toggle('active', idx === slideIndex);
+    });
+
+    dots.forEach((dot, idx) => {
+        dot.classList.toggle('active', idx === slideIndex);
+    });
+}
+
+setInterval(() => {
+    moveSlide('mainHeroCarousel', 1);
+}, 5500);
+
+setInterval(() => {
+    moveSlide('dualBannersCarousel', 1);
+}, 4500);
+
+// Hero Banners
+let bannerItems = [];
+let currentIndex = 0;
+
+async function loadHeroBanners() {
+    try {
+        const response = await client.getEntries({
+            content_type: 'banners'
+        });
+
+        if (!response.items || response.items.length === 0) return;
+
+        bannerItems = response.items;
+        updateBannerDisplay(currentIndex);
+        renderDots();
+    } catch (err) {
+        console.error("Error loading banners:", err);
+    }
+}
+
+function updateBannerDisplay(index) {
+    if (!bannerItems[index]) return;
+
+    const fields = bannerItems[index].fields;
+
+    const imgUrl = fields.image?.fields?.file?.url
+        ? `https:${fields.image.fields.file.url}`
+        : (fields.pic?.fields?.file?.url ? `https:${fields.pic.fields.file.url}` : '');
+
+    const img = document.getElementById('bannerImage');
+    const title = document.getElementById('bannerTitle');
+    const sub = document.getElementById('bannerSubtitle');
+    const btn = document.getElementById('bannerBtn');
+
+    if (img) img.src = imgUrl || "#";
+    if (title) title.innerText = fields.header || 'ONLY YOU';
+    if (sub) sub.innerText = fields.text || 'הנחה על כל סדרת 20% ONLY YOU';
+
+    if (btn) {
+        btn.href = fields.linkUrl || fields.targetPage || 'SalePage.html';
+        btn.innerText = fields.buttonText || 'קנה עכשיו';
+    }
+}
+
+function renderDots() {
+    const dotsContainer = document.getElementById('carouselDots');
+    if (!dotsContainer) return;
+
+    dotsContainer.innerHTML = bannerItems.map((_, idx) => `
+        <span class="dot ${idx === currentIndex ? 'active' : ''}" onclick="goToBanner(${idx})"></span>
+    `).join('');
+}
+
+window.moveBanner = function (direction) {
+    currentIndex = (currentIndex + direction + bannerItems.length) % bannerItems.length;
+    updateBannerDisplay(currentIndex);
+    renderDots();
+};
+
+window.goToBanner = function (index) {
+    currentIndex = index;
+    updateBannerDisplay(currentIndex);
+    renderDots();
+};
+
+// Dual Banners
+const dualBannersData = [
+    { img: 'Banners/PishtanBanner.png', alt: 'Banner 1', page: 'Pishtan.html' },
+    { img: 'Banners/HemphaBanner.png', alt: 'Banner 2', page: 'Hempha.html' },
+    { img: 'Banners/Coco&Honey Banner.png', alt: 'Banner 3', page: 'Coco&Honey.html' },
+    { img: 'Banners/MyCollection Banner.png', alt: 'Banner 4', page: 'MyCollection.html' },
+    { img: 'Banners/Keratin Forte Banner.png', alt: 'Banner 5', page: 'KeratinForte.html' },
+    { img: 'Banners/Curls Banner.png', alt: 'Banner 6', page: 'Curls.html' }
+];
+
+function renderDualBanners(items) {
+    const track = document.querySelector('#dualBannersCarousel .carousel-track');
+    const dotsContainer = document.querySelector('#dualBannersCarousel .carousel-dots');
+
+    if (!track) {
+        console.error("❌ Dual Banners Error: #dualBannersCarousel .carousel-track not found in HTML!");
+        return;
+    }
+    if (!dotsContainer) {
+        console.error("❌ Dual Banners Error: #dualBannersCarousel .carousel-dots not found in HTML!");
+        return;
+    }
+
+    track.innerHTML = '';
+    dotsContainer.innerHTML = '';
+
+    const isMobile = window.innerWidth <= 768;
+    const itemsPerSlide = isMobile ? 1 : 2;
+
+    let slideIndex = 0;
+    for (let i = 0; i < items.length; i += itemsPerSlide) {
+        const slideItems = items.slice(i, i + itemsPerSlide);
+
+        const slide = document.createElement('div');
+        slide.className = `carousel-slide ${slideIndex === 0 ? 'active' : ''}`;
+
+        const dualContainer = document.createElement('div');
+        dualContainer.className = 'dual-banners';
+
+        slideItems.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'banner-card';
+            card.innerHTML = `<img src="${item.img}" alt="${item.alt}" onclick="window.location.href='${item.page}'">`;
+            dualContainer.appendChild(card);
+        });
+
+        slide.appendChild(dualContainer);
+        track.appendChild(slide);
+
+        const currentIdx = slideIndex;
+        const dot = document.createElement('span');
+        dot.className = `dot ${currentIdx === 0 ? 'active' : ''}`;
+        dot.onclick = () => goToSlide('dualBannersCarousel', currentIdx);
+        dotsContainer.appendChild(dot);
+
+        slideIndex++;
+    }
+
+    goToSlide('dualBannersCarousel', 0);
+}
+
+let resizeTimer;
+window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+        renderDualBanners(dualBannersData);
+    }, 250);
+});
+
+setInterval(fetchProducts, 1200000);
+
 /* ==========================================
    3. PRODUCT CARD BUILDER & DISPLAY
    ========================================== */
@@ -345,55 +654,13 @@ function createProductCard(productData) {
     return li;
 }
 
-function displayProducts(products) {
-    const container = document.getElementById('ItemsList');
-    if (!container) return;
-
-    container.replaceChildren();
-
-    if (!Array.isArray(products) || products.length === 0) {
-        const msg = document.createElement("p");
-        msg.className = "no-products";
-        msg.textContent = "אין מוצרים זמינים כרגע.";
-        container.appendChild(msg);
-        return;
-    }
-
-    const targetCategory = container.getAttribute('data-category');
-    const isSalePage = container.getAttribute('data-sale') === "true";
-
-    let filtered = products.map(p => p.fields ? normalizeProduct(p) : p);
-
-    if (targetCategory) {
-        filtered = filtered.filter(item => item.category === targetCategory);
-    }
-    if (isSalePage) {
-        filtered = filtered.filter(item => item.onsale);
-    }
-
-    if (filtered.length === 0) {
-        const msg = document.createElement("p");
-        msg.className = "no-products";
-        msg.textContent = isSalePage ? "אין מוצרים במבצע כרגע." : "אין מוצרים זמינים בקטגוריה זו כרגע.";
-        container.appendChild(msg);
-        return;
-    }
-
-    const fragment = document.createDocumentFragment();
-    filtered.forEach(item => {
-        fragment.appendChild(createProductCard(item));
-    });
-
-    container.appendChild(fragment);
-    syncHeartIcons();
-}
-
 function goToProductPage(product) {
     if (!product) return;
     const norm = product.fields ? normalizeProduct(product) : product;
     sessionStorage.setItem('selectedProduct', JSON.stringify(norm));
     window.location.href = `product.html?id=${norm.id}`;
 }
+
 
 /* ==========================================
    4. WISHLIST FUNCTIONS
@@ -531,7 +798,41 @@ window.quickSearch = function (term) {
 };
 
 /* ==========================================
-   6. CART & NAVIGATION HELPERS
+   6. MOBILE MENU, SWIPE GESTURES & NAVIGATION
+   ========================================== */
+
+function PageLoaded() {
+    CloseCart();
+    updateWishlistBadge();
+    renderWishlistPage();
+    syncHeartIcons();
+
+    let cart = getCart();
+    let totalQty = cart.reduce((sum, item) => sum + (item.quantity || item.qty || 1), 0);
+    localStorage.setItem("OpCartQ", totalQty);
+    updateCartQuantity(totalQty);
+    renderCart();
+}
+
+
+window.toggleMenu = function () {
+    const sideMenu = document.getElementById("sideMenu");
+    const menuOverlay = document.getElementById("menuOverlay");
+
+    if (sideMenu) sideMenu.classList.toggle('active');
+    if (menuOverlay) menuOverlay.classList.toggle('active');
+    document.body.classList.toggle('no-scroll');
+};
+
+window.toggleDropdown = function (element) {
+    const parentLi = element.closest('li.has-dropdown');
+    if (parentLi) {
+        parentLi.classList.toggle('active');
+    }
+};
+
+/* ==========================================
+   7. CART & STORAGE HELPERS
    ========================================== */
 function AddCartItem(name, id, price, src) {
     OpenCart();
@@ -546,18 +847,6 @@ window.CloseCart = function () {
     }
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Selects all elements with id="Cart" or class="cart-modal"
-    document.querySelectorAll('#Cart, .cart-modal').forEach(cart => {
-        cart.addEventListener('click', (event) => {
-            // Prevents closing when clicking content INSIDE the cart
-            if (event.target === cart) {
-                CloseCart();
-            }
-        });
-    });
-});
-
 window.OpenCart = function () {
     const Cart = document.getElementById("Cart");
     if (Cart) {
@@ -566,8 +855,25 @@ window.OpenCart = function () {
     }
 };
 
-function PageLoaded() {
-    CloseCart();
+document.addEventListener('DOMContentLoaded', async () => {
+    // 1. אתחול עגלה ונתוני בסיס
+    PageLoaded();
+
+    // 2. טעינת נתונים מ-Contentful (הגדרות חנות + פס מבצעים)
+    await fetchStoreSettings();
+
+    // 3. טעינת באנרים ראשיים ומוצרים
+    await loadHeroBanners();
+    await fetchProducts();
+
+    // 4. טעינת הבאנרים הכפולים
+    if (typeof dualBannersData !== 'undefined') {
+        renderDualBanners(dualBannersData);
+    } else {
+        console.error("❌ dualBannersData is not defined!");
+    }
+
+    // 2. Initialize UI states on page load / refresh
     updateWishlistBadge();
     renderWishlistPage();
     syncHeartIcons();
@@ -577,7 +883,17 @@ function PageLoaded() {
     localStorage.setItem("OpCartQ", totalQty);
     updateCartQuantity(totalQty);
     renderCart();
-}
+
+    // Backdrop click listener for modal
+    document.querySelectorAll('#Cart, .cart-modal').forEach(cart => {
+        cart.addEventListener('click', (event) => {
+            if (event.target === cart) {
+                CloseCart();
+                window.location.reload();
+            }
+        });
+    });
+});
 
 function updateCartQuantity(newQuantity) {
     const badge = document.querySelector('.icon-btn .badge');
@@ -641,25 +957,99 @@ function addToCart(name, id, price, src) {
     renderCart();
 }
 
-function renderCart() {
+/* ==========================================
+   8. CART CALCULATION HELPER
+   ========================================== */
+function getCartCalculation() {
     const cart = getCart();
+    let totalCartSum = 0;
+    let qtyOVERall = 0;
+
+    let allUnits = [];
+    cart.forEach(cartItem => {
+        const itemQty = Number(cartItem.quantity || cartItem.qty || 1);
+        qtyOVERall += itemQty;
+        for (let i = 0; i < itemQty; i++) {
+            allUnits.push({
+                id: cartItem.id,
+                name: cartItem.name || cartItem.title,
+                price: Number(cartItem.price),
+                src: cartItem.src || cartItem.image
+            });
+        }
+    });
+
+    allUnits.sort((a, b) => a.price - b.price);
+
+    let freeItemsCount = 0;
+    let hasMysteryGift = false;
+
+    if (activePromotions.mysteryGift !== 0 && qtyOVERall >= activePromotions.mysteryGift) {
+        hasMysteryGift = true;
+    }
+
+    if (activePromotions.nPlusOneSale !== 0 && qtyOVERall >= activePromotions.nPlusOneSale) {
+        freeItemsCount = 1;
+    }
+
+    let freeUnits = allUnits.slice(0, freeItemsCount);
+    let paidUnits = allUnits.slice(freeItemsCount);
+
+    paidUnits.forEach(u => totalCartSum += u.price);
+
+    const mysteryGiftItem = hasMysteryGift ? {
+        id: 'mystery-gift',
+        name: 'מתנה מפתיעה (Mystery Gift)',
+        price: 0,
+        src: 'Pictures/placeholder.png',
+        isMystery: true
+    } : null;
+
+    return {
+        cart,
+        totalCartSum,
+        qtyOVERall,
+        freeUnits,
+        paidUnits,
+        mysteryGiftItem,
+        freeShippingThreshold: activePromotions.freeShipping
+    };
+}
+
+/* ==========================================
+   9. RENDER CART WITH HINTS & PROMOS
+   ========================================== */
+function renderCart() {
     const CartUl = document.getElementById("CartItems");
     const OverAll = document.getElementById("Cost");
 
     if (CartUl) CartUl.replaceChildren();
 
-    let totalCartSum = 0;
+    const { cart, totalCartSum, qtyOVERall, freeUnits, paidUnits, mysteryGiftItem } = getCartCalculation();
 
-    cart.forEach(item => {
-        const itemQty = Number(item.quantity || item.qty || 1);
-        const itemTotalCost = item.price * itemQty;
-        totalCartSum += itemTotalCost;
+    let paidMap = {};
+    paidUnits.forEach(u => {
+        if (!paidMap[u.id]) {
+            paidMap[u.id] = { id: u.id, name: u.name, price: u.price, src: u.src, qty: 0 };
+        }
+        paidMap[u.id].qty++;
+    });
 
+    let freeMap = {};
+    freeUnits.forEach(u => {
+        if (!freeMap[u.id]) {
+            freeMap[u.id] = { id: u.id, name: u.name, price: u.price, src: u.src, qty: 0 };
+        }
+        freeMap[u.id].qty++;
+    });
+
+    // 1. Render regular paid cart items
+    Object.values(paidMap).forEach(item => {
         const li = document.createElement("li");
         li.className = "cart-item";
 
         const img = document.createElement("img");
-        img.src = item.src || item.image || 'Pictures/placeholder.png';
+        img.src = item.src || 'Pictures/placeholder.png';
         img.className = "cart-item-img";
 
         const detailsContainer = document.createElement("div");
@@ -667,11 +1057,11 @@ function renderCart() {
 
         const Pname = document.createElement("p");
         Pname.className = "cart-item-name";
-        Pname.textContent = item.name || item.title;
+        Pname.textContent = item.name;
 
         const Pprice = document.createElement("p");
         Pprice.className = "cart-item-price";
-        Pprice.textContent = `${itemQty} x ₪${item.price} = ₪${itemTotalCost}`;
+        Pprice.textContent = `${item.qty} x ₪${item.price} = ₪${item.qty * item.price}`;
 
         detailsContainer.appendChild(Pname);
         detailsContainer.appendChild(Pprice);
@@ -685,7 +1075,7 @@ function renderCart() {
 
         const Quantity = document.createElement("p");
         Quantity.className = "cart-item-qty-text";
-        Quantity.textContent = itemQty;
+        Quantity.textContent = getCartItemTotalQty(item.id);
 
         const Minus = document.createElement("button");
         Minus.textContent = "-";
@@ -699,84 +1089,391 @@ function renderCart() {
         li.appendChild(detailsContainer);
         li.appendChild(controlsColumn);
 
-        Minus.addEventListener("click", function () {
-            let currentCart = getCart();
-            let foundItem = currentCart.find(i => String(i.id) === String(item.id));
-            if (foundItem) {
-                let currentQty = (foundItem.quantity || foundItem.qty || 1) - 1;
-                if (currentQty <= 0) {
-                    currentCart = currentCart.filter(i => String(i.id) !== String(item.id));
-                } else {
-                    foundItem.quantity = currentQty;
-                    foundItem.qty = currentQty;
-                }
-                saveCart(currentCart);
-                renderCart();
-            }
-        });
-
-        Plus.addEventListener("click", function () {
-            let currentCart = getCart();
-            let foundItem = currentCart.find(i => String(i.id) === String(item.id));
-            if (foundItem) {
-                let currentQty = (foundItem.quantity || foundItem.qty || 1) + 1;
-                foundItem.quantity = currentQty;
-                foundItem.qty = currentQty;
-                saveCart(currentCart);
-                renderCart();
-            }
-        });
+        Minus.addEventListener("click", () => updateItemQuantity(item.id, -1));
+        Plus.addEventListener("click", () => updateItemQuantity(item.id, 1));
 
         if (CartUl) CartUl.appendChild(li);
     });
 
+    // 2. Render Free Gift item lines (from cart)
+    Object.values(freeMap).forEach(gift => {
+        const li = document.createElement("li");
+        li.className = "cart-item gift-item";
+        li.style.backgroundColor = "#f0f9f4";
+
+        const img = document.createElement("img");
+        img.src = gift.src || 'Pictures/placeholder.png';
+        img.className = "cart-item-img";
+
+        const detailsContainer = document.createElement("div");
+        detailsContainer.className = "cart-item-details";
+
+        const Pname = document.createElement("p");
+        Pname.className = "cart-item-name";
+        const saleCount = activePromotions.nPlusOneSale > 0 ? activePromotions.nPlusOneSale - 1 : 5;
+        Pname.innerHTML = `<span style="color: #27ae60; font-weight: bold;">🎁 מוצר מתנה (מבצע ${saleCount}+1):</span> ${gift.name}`;
+
+        const Pprice = document.createElement("p");
+        Pprice.className = "cart-item-price";
+        Pprice.innerHTML = `<span style="text-decoration: line-through; color: #888;">₪${gift.price}</span> <strong style="color: #27ae60;">₪0</strong>`;
+
+        detailsContainer.appendChild(Pname);
+        detailsContainer.appendChild(Pprice);
+
+        const controlsColumn = document.createElement("div");
+        controlsColumn.className = "item-controls-column";
+
+        const giftQtyLabel = document.createElement("p");
+        giftQtyLabel.className = "cart-item-qty-text";
+        giftQtyLabel.textContent = `${gift.qty} יח'`;
+        controlsColumn.appendChild(giftQtyLabel);
+
+        li.appendChild(img);
+        li.appendChild(detailsContainer);
+        li.appendChild(controlsColumn);
+
+        if (CartUl) CartUl.appendChild(li);
+    });
+
+    // 3. Render Mystery Gift line
+    if (mysteryGiftItem) {
+        const li = document.createElement("li");
+        li.className = "cart-item gift-item mystery-gift-item";
+        li.style.backgroundColor = "#fef9e7";
+
+        const img = document.createElement("img");
+        img.src = "";
+        img.className = "cart-item-img";
+        img.style.display = "none";
+
+        const detailsContainer = document.createElement("div");
+        detailsContainer.className = "cart-item-details";
+
+        const Pname = document.createElement("p");
+        Pname.className = "cart-item-name";
+        Pname.innerHTML = `<span style="color: #d4ac0d; font-weight: bold;">🎁 מתנה מפתיעה מג'ויה:</span> מוצר הפתעה בלעדי!`;
+
+        const Pprice = document.createElement("p");
+        Pprice.className = "cart-item-price";
+        Pprice.innerHTML = `<strong style="color: #27ae60;">₪0</strong>`;
+
+        detailsContainer.appendChild(Pname);
+        detailsContainer.appendChild(Pprice);
+
+        const controlsColumn = document.createElement("div");
+        controlsColumn.className = "item-controls-column";
+
+        const giftQtyLabel = document.createElement("p");
+        giftQtyLabel.className = "cart-item-qty-text";
+        giftQtyLabel.textContent = `1 יח'`;
+        controlsColumn.appendChild(giftQtyLabel);
+
+        li.appendChild(img);
+        li.appendChild(detailsContainer);
+        li.appendChild(controlsColumn);
+
+        if (CartUl) CartUl.appendChild(li);
+    }
+
     if (OverAll) {
-        if (totalCartSum < 250) {
-            OverAll.innerHTML = `סך הכל: ₪${totalCartSum}<br>הזמנה מעל ₪250 משלוח חינם!`;
-        } else {
-            OverAll.innerHTML = `סך הכל: ₪${totalCartSum}<br>משלוח חינם!`;
+        OverAll.textContent = `סך הכל: ₪${totalCartSum.toFixed(2)}`;
+    }
+
+    // Dynamic Hints Footer Update
+    const promoNoticeElement = document.getElementById("cartPromoNotice");
+    if (promoNoticeElement) {
+        const nPlusThreshold = activePromotions.nPlusOneSale || 0;
+        const mysteryThreshold = activePromotions.mysteryGift || 0;
+        const freeShippingThreshold = activePromotions.freeShipping || 0;
+
+        let hints = [];
+
+        if (mysteryThreshold > 0 && qtyOVERall >= mysteryThreshold) {
+            hints.push("🎁 זכית במבצע ובמתנה מפתיעה בלעדית!");
+        } else if (nPlusThreshold > 0 && qtyOVERall >= nPlusThreshold) {
+            const itemsUntilMystery = mysteryThreshold - qtyOVERall;
+            if (mysteryThreshold > 0 && itemsUntilMystery > 0) {
+                hints.push(`🎁 זכית במבצע! הוסף עוד ${itemsUntilMystery} מוצרים לקבלת מתנה מפתיעה.`);
+            } else {
+                hints.push("🎁 זכית במוצר מתנה במבצע!");
+            }
+        } else if (nPlusThreshold > 0) {
+            const itemsUntilPromo = nPlusThreshold - qtyOVERall;
+            hints.push(`🛍️ הוסף עוד ${itemsUntilPromo} מוצרים לסל כדי לקבל מוצר מתנה!`);
         }
+
+        if (freeShippingThreshold > 0) {
+            if (totalCartSum >= freeShippingThreshold) {
+                hints.push("🚚 זכית במשלוח חינם!");
+            } else {
+                const amountNeeded = (freeShippingThreshold - totalCartSum).toFixed(2);
+                hints.push(`🚚 הוסף עוד ₪${amountNeeded} לסל כדי לקבל משלוח חינם!`);
+            }
+        }
+
+        promoNoticeElement.innerHTML = hints.join("<br>");
     }
 }
+
+function getCartItemTotalQty(id) {
+    const cart = getCart();
+    const found = cart.find(i => String(i.id) === String(id));
+    return found ? (found.quantity || found.qty || 1) : 0;
+}
+
+function updateItemQuantity(id, change) {
+    let currentCart = getCart();
+    let foundItem = currentCart.find(i => String(i.id) === String(id));
+    if (foundItem) {
+        let currentQty = (foundItem.quantity || foundItem.qty || 1) + change;
+        if (currentQty <= 0) {
+            currentCart = currentCart.filter(i => String(i.id) !== String(id));
+        } else {
+            foundItem.quantity = currentQty;
+            foundItem.qty = currentQty;
+        }
+        saveCart(currentCart);
+        renderCart();
+    }
+}
+
+/* ==========================================
+   10. CHECKOUT PAGE MODULE (Namespaced)
+   ========================================== */
+window.JoyaCheckout = {
+    settings: {
+        freeShippingThreshold: 250.00,
+        baseDeliveryFee: 35.00,
+        nPlusOneSaleQty: 0,
+        mysteryGiftQty: 0
+    },
+
+    init: async function() {
+        await this.fetchSettings();
+        this.renderSummary();
+    },
+
+    fetchSettings: async function() {
+        try {
+            const response = await client.getEntries({
+                content_type: 'storeSettings',
+                limit: 1,
+                order: '-sys.updatedAt'
+            });
+            if (response.items && response.items.length > 0) {
+                const fields = response.items[0].fields;
+                this.settings.freeShippingThreshold = Number(fields.freeShipping || 250.00);
+                this.settings.nPlusOneSaleQty = Number(fields.nPlusOneSale || fields.nPlusOne || 0);
+                this.settings.mysteryGiftQty = Number(fields.mysteryGift || fields.mysteryGiftThreshold || 0);
+            }
+        } catch (err) {
+            console.warn("Could not fetch store settings, using defaults", err);
+        }
+    },
+
+    renderSummary: function() {
+        const container = document.getElementById('checkoutItems');
+        const subtotalElement = document.getElementById('modalSubtotal');
+        const deliveryElement = document.getElementById('modalDelivery');
+        const totalElement = document.getElementById('modalTotal');
+        const promoNotice = document.getElementById('promoNotice');
+
+        if (!container) return;
+
+        const rawCart = getCart();
+
+        if (!rawCart || rawCart.length === 0) {
+            container.innerHTML = `
+        <div style="text-align:center; padding: 20px; color: #721c24; background-color: #f8d7da; border-radius: 8px; margin: 10px 0;">
+          <strong>העגלה שלך ריקה</strong>
+          <p style="margin-top: 5px; font-size: 0.85rem;">לא נמצאו מוצרים בזיכרון הדפדפן (localStorage)</p>
+        </div>`;
+            if (subtotalElement) subtotalElement.textContent = '₪0.00';
+            if (deliveryElement) deliveryElement.textContent = '₪0.00';
+            if (totalElement) totalElement.textContent = '₪0.00';
+            return;
+        }
+
+        let totalCartSum = 0;
+        let qtyOverall = 0;
+        let allUnits = [];
+
+        rawCart.forEach((item, index) => {
+            const qty = Number(item.quantity || item.qty || item.count || 1);
+            const price = Number(item.price || item.cost || item.unitPrice || 0);
+            const name = item.name || item.title || item.productName || `מוצר #${index + 1}`;
+            const id = item.id || item._id || name;
+
+            qtyOverall += qty;
+            for (let i = 0; i < qty; i++) {
+                allUnits.push({ id, name, price });
+            }
+        });
+
+        allUnits.sort((a, b) => a.price - b.price);
+
+        let freeItemsCount = 0;
+        let hasMysteryGift = false;
+
+        if (this.settings.mysteryGiftQty > 0 && qtyOverall >= this.settings.mysteryGiftQty) {
+            if (this.settings.nPlusOneSaleQty > 0) freeItemsCount = 1;
+            hasMysteryGift = true;
+        } else if (this.settings.nPlusOneSaleQty > 0 && qtyOverall >= this.settings.nPlusOneSaleQty) {
+            freeItemsCount = 1;
+        }
+
+        let freeUnits = allUnits.slice(0, freeItemsCount);
+        let paidUnits = allUnits.slice(freeItemsCount);
+
+        paidUnits.forEach(u => totalCartSum += u.price);
+        container.innerHTML = '';
+
+        let paidMap = {};
+        paidUnits.forEach(u => {
+            if (!paidMap[u.id]) paidMap[u.id] = { name: u.name, price: u.price, qty: 0 };
+            paidMap[u.id].qty++;
+        });
+
+        Object.values(paidMap).forEach(item => {
+            const row = document.createElement('div');
+            row.style.cssText = "display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #eee;";
+            row.innerHTML = `
+        <div>
+          <span style="font-weight: 600;">${item.name}</span>
+          <span style="color: #777;"> (x${item.qty})</span>
+        </div>
+        <span style="font-weight: bold; color: #d88195;">₪${(item.qty * item.price).toFixed(2)}</span>
+      `;
+            container.appendChild(row);
+        });
+
+        let freeMap = {};
+        freeUnits.forEach(u => {
+            if (!freeMap[u.id]) freeMap[u.id] = { name: u.name, price: u.price, qty: 0 };
+            freeMap[u.id].qty++;
+        });
+
+        Object.values(freeMap).forEach(gift => {
+            const row = document.createElement('div');
+            row.style.cssText = "display: flex; justify-content: space-between; padding: 10px; margin: 5px 0; background: #f0f9f4; border: 1px solid #c3e6cb; border-radius: 6px;";
+            row.innerHTML = `
+        <div>
+          <span style="color: #28a745; font-weight: bold;">🎁 מוצר מתנה (מבצע):</span>
+          <span>${gift.name}</span>
+        </div>
+        <div>
+          <span style="text-decoration: line-through; color: #888; margin-left: 6px;">₪${gift.price.toFixed(2)}</span>
+          <span style="font-weight: bold; color: #28a745;">₪0.00</span>
+        </div>
+      `;
+            container.appendChild(row);
+        });
+
+        if (hasMysteryGift) {
+            const row = document.createElement('div');
+            row.style.cssText = "display: flex; justify-content: space-between; padding: 10px; margin: 5px 0; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 6px;";
+            row.innerHTML = `
+        <div>
+          <span style="color: #856404; font-weight: bold;">🎁 מתנה מפתיעה (Mystery Gift):</span>
+          <span>מוצר הפתעה בלעדי!</span>
+        </div>
+        <span style="font-weight: bold; color: #28a745;">₪0.00</span>
+      `;
+            container.appendChild(row);
+        }
+
+        const isFreeShipping = this.settings.freeShippingThreshold > 0 && totalCartSum >= this.settings.freeShippingThreshold;
+        const deliveryFee = isFreeShipping ? 0 : this.settings.baseDeliveryFee;
+        const grandTotal = totalCartSum + deliveryFee;
+
+        if (subtotalElement) subtotalElement.textContent = `₪${totalCartSum.toFixed(2)}`;
+        if (deliveryElement) {
+            deliveryElement.innerHTML = deliveryFee === 0
+                ? '<span style="color: #28a745; font-weight: bold;">חינם</span>'
+                : `₪${deliveryFee.toFixed(2)}`;
+        }
+        if (totalElement) totalElement.textContent = `₪${grandTotal.toFixed(2)}`;
+
+        if (promoNotice) {
+            if (hasMysteryGift) {
+                promoNotice.textContent = "🎁 קיבלת מוצר מתנה במבצע + מתנה מפתיעה!";
+            } else if (freeItemsCount > 0) {
+                promoNotice.textContent = "🎁 קיבלת מוצר מתנה במבצע!";
+            } else {
+                promoNotice.textContent = "";
+            }
+        }
+    }
+};
 
 /* ==========================================
    7. MAKE WEBHOOK INTEGRATION
    ========================================== */
 const MAKE_WEBHOOK_URL = 'https://hook.eu1.make.com/4v3u6jcd1mik088lvu80v06e3ou5g8qc';
 
-const checkoutForm = document.getElementById('checkoutForm');
-let isSubmitting = false; // Synchronous lock flag
+// 1. Target your checkout form by its exact HTML ID (e.g., id="checkoutForm")
+const checkoutForm = document.getElementById('checkoutForm') || document.querySelector('form');
+const checkoutBtn = document.getElementById('payBtn') || document.querySelector('.primary-btn');
 
-function PlayBtnAnim(){
-    const btn = document.getElementById('payBtn');
-    btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> מעבד תשלום...`;
-}
-
-if (checkoutForm) {
+if (checkoutForm && checkoutBtn) {
     checkoutForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        console.log("👉 Form submit event triggered successfully!");
 
-        // 1. Instant lock check to stop rapid second triggers
-        if (isSubmitting) return;
-        isSubmitting = true;
+        // 2. Read and verify field values
+        const firstName = document.getElementById('firstName')?.value.trim() || '';
+        const lastName = document.getElementById('lastName')?.value.trim() || '';
+        const email = document.getElementById('custEmail')?.value.trim() || '';
+        const phone = document.getElementById('custPhone')?.value.trim() || '';
+        const address = document.getElementById('custAddress')?.value.trim() || '';
+        const city = document.getElementById('custCity')?.value.trim() || '';
 
-        const payBtn = document.getElementById('payBtn');
+        console.log("📝 Read field values:", { firstName, lastName, email, phone, address, city });
+
+        // 3. Validate required fields
+        const allFilled = firstName && lastName && email && phone && address && city;
+        if (!allFilled) {
+            console.warn("⚠️ Submission blocked: One or more required fields are empty.");
+            alert("אנא מלא את כל שדות החובה לפני המשך התשלום.");
+            return;
+        }
+
+        // 4. Prevent duplicate rapid triggers
+        if (window.isSubmitting) {
+            console.warn("⚠️ Submission blocked: Request already in progress.");
+            return;
+        }
+        window.isSubmitting = true;
+
+        // 5. Show loading animation
+        const originalContent = checkoutBtn.innerHTML;
+        checkoutBtn.innerHTML = `<span class="spinner"></span> מייצר קישור תשלום...`;
+        checkoutBtn.style.opacity = '0.7';
+        checkoutBtn.style.cursor = 'not-allowed';
 
         const customerData = {
-            name: document.getElementById('firstName') + " " + document.getElementById('lastName'),
-            email: document.getElementById('custEmail')?.value || '',
-            phone: document.getElementById('custPhone')?.value || '',
-            adress: document.getElementById('custAddress')?.value + document.getElementById('custCity')?.value,
+            name: firstName + " " + lastName,
+            email: email,
+            phone: phone,
+            adress: address + " " + city,
         };
 
         try {
-            await sendCheckoutToMake(customerData, payBtn);
+            console.log("🚀 Calling sendCheckoutToMake()...");
+            await sendCheckoutToMake(customerData, checkoutBtn);
+        } catch (err) {
+            console.error("❌ Exception caught during checkout:", err);
         } finally {
-            // Unlock only if submission failed and user stayed on page
-            isSubmitting = false;
+            // Restore button state
+            checkoutBtn.style.opacity = '1';
+            checkoutBtn.style.cursor = 'pointer';
+            checkoutBtn.innerHTML = originalContent;
+            window.isSubmitting = false;
+            console.log("🔒 Submission completed and button reset.");
         }
     });
+} else {
+    console.error("❌ Checkout form or button not found in the DOM!");
 }
 
 async function sendCheckoutToMake(customerDetails = {}, btn = null) {
@@ -869,208 +1566,7 @@ function resetButton(btn, originalText) {
     }
 }
 
-/* ==========================================
-   8. SIDE MENU & UI NAVIGATION
-   ========================================== */
-window.toggleMenu = function () {
-    const sideMenu = document.getElementById('sideMenu');
-    const overlay = document.getElementById('menuOverlay');
 
-    if (sideMenu && overlay) {
-        sideMenu.classList.toggle('active');
-        overlay.classList.toggle('active');
-    }
-};
-
-window.toggleDropdown = function (element) {
-    const parent = element.parentElement;
-    if (parent) {
-        parent.classList.toggle('open');
-    }
-};
-
-/* ==========================================
-   9. CAROUSELS & BANNERS LOGIC
-   ========================================== */
-const carouselStates = {
-    mainHeroCarousel: 0,
-    dualBannersCarousel: 0
-};
-
-window.moveSlide = function (carouselId, direction) {
-    const carousel = document.getElementById(carouselId);
-    if (!carousel) return;
-
-    const slides = carousel.querySelectorAll('.carousel-slide');
-    const totalSlides = slides.length;
-    if (totalSlides === 0) return;
-
-    let currentIndex = carouselStates[carouselId] || 0;
-    currentIndex = (currentIndex + direction + totalSlides) % totalSlides;
-
-    goToSlide(carouselId, currentIndex);
-};
-
-function goToSlide(carouselId, slideIndex) {
-    const carousel = document.getElementById(carouselId);
-    if (!carousel) return;
-
-    const track = carousel.querySelector('.carousel-track');
-    const slides = carousel.querySelectorAll('.carousel-slide');
-    const dots = carousel.querySelectorAll('.carousel-dots .dot');
-
-    if (!track || slides.length === 0) return;
-
-    if (slideIndex < 0 || slideIndex >= slides.length) return;
-
-    carouselStates[carouselId] = slideIndex;
-    track.style.transform = `translateX(${slideIndex * 100}%)`;
-
-    slides.forEach((slide, idx) => {
-        slide.classList.toggle('active', idx === slideIndex);
-    });
-
-    dots.forEach((dot, idx) => {
-        dot.classList.toggle('active', idx === slideIndex);
-    });
-}
-
-setInterval(() => {
-    moveSlide('mainHeroCarousel', 1);
-}, 5500);
-
-setInterval(() => {
-    moveSlide('dualBannersCarousel', 1);
-}, 4500);
-
-// Hero Banners
-let bannerItems = [];
-let currentIndex = 0;
-
-async function loadHeroBanners() {
-    try {
-        const response = await client.getEntries({
-            content_type: 'banners'
-        });
-
-        if (!response.items || response.items.length === 0) return;
-
-        bannerItems = response.items;
-        updateBannerDisplay(currentIndex);
-        renderDots();
-    } catch (err) {
-        console.error("Error loading banners:", err);
-    }
-}
-
-function updateBannerDisplay(index) {
-    if (!bannerItems[index]) return;
-
-    const fields = bannerItems[index].fields;
-
-    const imgUrl = fields.image?.fields?.file?.url
-        ? `https:${fields.image.fields.file.url}`
-        : (fields.pic?.fields?.file?.url ? `https:${fields.pic.fields.file.url}` : '');
-
-    const img = document.getElementById('bannerImage');
-    const title = document.getElementById('bannerTitle');
-    const sub = document.getElementById('bannerSubtitle');
-    const btn = document.getElementById('bannerBtn');
-
-    if (img) img.src = imgUrl || "#";
-    if (title) title.innerText = fields.header || 'ONLY YOU';
-    if (sub) sub.innerText = fields.text || 'הנחה על כל סדרת 20% ONLY YOU';
-
-    if (btn) {
-        btn.href = fields.linkUrl || fields.targetPage || 'SalePage.html';
-        btn.innerText = fields.buttonText || 'קנה עכשיו';
-    }
-}
-
-function renderDots() {
-    const dotsContainer = document.getElementById('carouselDots');
-    if (!dotsContainer) return;
-
-    dotsContainer.innerHTML = bannerItems.map((_, idx) => `
-        <span class="dot ${idx === currentIndex ? 'active' : ''}" onclick="goToBanner(${idx})"></span>
-    `).join('');
-}
-
-window.moveBanner = function (direction) {
-    currentIndex = (currentIndex + direction + bannerItems.length) % bannerItems.length;
-    updateBannerDisplay(currentIndex);
-    renderDots();
-};
-
-window.goToBanner = function (index) {
-    currentIndex = index;
-    updateBannerDisplay(currentIndex);
-    renderDots();
-};
-
-// Dual Banners
-const dualBannersData = [
-    { img: 'Banners/PishtanBanner.png', alt: 'Banner 1', page: 'Pishtan.html' },
-    { img: 'Banners/HemphaBanner.png', alt: 'Banner 2', page: 'Hempha.html' },
-    { img: 'Banners/Coco&Honey Banner.png', alt: 'Banner 3', page: 'Coco&Honey.html' },
-    { img: 'Banners/MyCollection Banner.png', alt: 'Banner 4', page: 'MyCollection.html' },
-    { img: 'Banners/Keratin Forte Banner.png', alt: 'Banner 5', page: 'KeratinForte.html' },
-    { img: 'Banners/Curls Banner.png', alt: 'Banner 6', page: 'Curls.html' }
-];
-
-function renderDualBanners(items) {
-    const track = document.querySelector('#dualBannersCarousel .carousel-track');
-    const dotsContainer = document.querySelector('#dualBannersCarousel .carousel-dots');
-
-    if (!track || !dotsContainer) return;
-
-    track.innerHTML = '';
-    dotsContainer.innerHTML = '';
-
-    const isMobile = window.innerWidth <= 768;
-    const itemsPerSlide = isMobile ? 1 : 2;
-
-    let slideIndex = 0;
-    for (let i = 0; i < items.length; i += itemsPerSlide) {
-        const slideItems = items.slice(i, i + itemsPerSlide);
-
-        const slide = document.createElement('div');
-        slide.className = `carousel-slide ${slideIndex === 0 ? 'active' : ''}`;
-
-        const dualContainer = document.createElement('div');
-        dualContainer.className = 'dual-banners';
-
-        slideItems.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'banner-card';
-            card.innerHTML = `<img src="${item.img}" alt="${item.alt}" onclick="window.location.href='${item.page}'">`;
-            dualContainer.appendChild(card);
-        });
-
-        slide.appendChild(dualContainer);
-        track.appendChild(slide);
-
-        const currentIdx = slideIndex;
-        const dot = document.createElement('span');
-        dot.className = `dot ${currentIdx === 0 ? 'active' : ''}`;
-        dot.onclick = () => goToSlide('dualBannersCarousel', currentIdx);
-        dotsContainer.appendChild(dot);
-
-        slideIndex++;
-    }
-
-    goToSlide('dualBannersCarousel', 0);
-}
-
-let resizeTimer;
-window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-        renderDualBanners(dualBannersData);
-    }, 250);
-});
-
-setInterval(fetchProducts, 1200000);
 
 /* ==========================================
    10. SINGLE CONSOLIDATED DOM LOAD LISTENER
@@ -1081,6 +1577,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchProducts();
     loadHeroBanners();
     renderDualBanners(dualBannersData);
+
 
     // 2. Sections to hide during active search
     const categoriesSection = document.querySelector('.categories-section');
@@ -1102,27 +1599,6 @@ document.addEventListener('DOMContentLoaded', () => {
             listItems.forEach((item) => {
                 let itemText = item.textContent || item.innerText;
                 item.style.display = isSmartSearchMatch(itemText, query) ? '' : 'none';
-            });
-        });
-    }
-
-    // 4. Checkout Button Listener
-    const checkoutBtn = document.getElementById('payBtn') || document.querySelector('.primary-btn');
-    if (checkoutBtn) {
-        checkoutBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-
-            const FirstnameInput = document.getElementById('firstName')?.value || '';
-            const LastnameInput = document.getElementById('lastName')?.value || '';
-            const emailInput = document.getElementById('custEmail')?.value || '';
-            const phoneInput = document.getElementById('custPhone')?.value || '';
-            const adressInput = document.getElementById('custAddress')?.value +  document.getElementById('custCity')?.value|| '';
-
-            sendCheckoutToMake({
-                name: (FirstnameInput + " " + LastnameInput).trim(),
-                email: emailInput,
-                phone: phoneInput,
-                adress: adressInput,
             });
         });
     }
