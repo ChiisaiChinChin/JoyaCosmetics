@@ -50,13 +50,13 @@ function initPromoStrip() {
 
     // 1. אוספים את כל המבצעים הפעילים
     if (activePromotions.nPlusOneSale > 0) {
-        promoMessages.push(`🎁 מבצע מיוחד! קני ${activePromotions.nPlusOneSale} מוצרים וקבלי מוצר במתנה!`);
+        promoMessages.push(`🎁 מבצע מיוחד! קני ${activePromotions.nPlusOneSale} מוצרים וקבלו מוצר במתנה! (04/11/2026 - 30/12/2026`);
     }
     if (activePromotions.freeShipping > 0) {
         promoMessages.push(`🚚 משלוח חינם בקנייה מעל ₪${activePromotions.freeShipping}!`);
     }
     if (activePromotions.mysteryGift > 0) {
-        promoMessages.push(`✨ מתנה מפתיעה בכל קנייה מעל ${activePromotions.mysteryGift} מוצרים!`);
+        promoMessages.push(`✨ מתנה מפתיעה בכל קנייה מעל ${activePromotions.mysteryGift} מוצרים! (04/11/2026 - 30/12/2026)`);
     }
 
     // 2. אם אין אף מבצע פעיל - הסתר לחלוטין את הפס העליון
